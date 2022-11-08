@@ -15,7 +15,8 @@ const moment = require('dayjs');
 const knex = require('./lib/knex')('mysql', config[config.db]);
 const inquirer = require('inquirer')
 const chalk = require('chalk')
-const { runInContext } = require('vm');
+const capex = require('./generate-budget-plan/capex');
+const opex = require('./generate-budget-plan/opex');
 const menuList = [
   new inquirer.Separator(),
   'CAPEX',
@@ -62,10 +63,14 @@ run = async () => {
     process.exit(0);
   }
 
-  if (menu === 'CAPEX') {
-    
-  } else if (menu === 'OPEX') {
+  let budgetYear = '';
+  let dateTime = '';
+  let contactPointDepartment = '';
 
+  if (menu === 'CAPEX') {
+    await opex.generateBudgetPlanOPEX(budgetYear, dateTime, contactPointDepartment)
+  } else if (menu === 'OPEX') {
+    await opex.generateBudgetPlanOPEX(budgetYear, dateTime, contactPointDepartment)
   }
 }
 

@@ -4,7 +4,7 @@ module.exports = {
     generateBudgetPlanOPEX
 }
 
-function generateBudgetPlanOPEX(budgetYear, dateTime, contactPointDepartment) {
+async function generateBudgetPlanOPEX(budgetYear, dateTime, contactPointDepartment) {
 
 }
 
