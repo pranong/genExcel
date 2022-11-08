@@ -1,18 +1,18 @@
 const express = require('express');
-const fsp = require('fs').promises;
-const bodyParser = require('body-parser');
-const cors = require('cors');
 const app = express();
-const fs = require('fs')
+const cors = require('cors');
+// const fsp = require('fs').promises;
+// const bodyParser = require('body-parser');
+// const fs = require('fs')
 // const path = require('path')
-const http = require('http').createServer(app);
-const path = require('path');
-const util = require('./lib/util');
-const config = require('./config');
-const Excel = require('exceljs')
-const schedule = require('node-schedule');
-const moment = require('dayjs');
-const knex = require('./lib/knex')('mysql', config[config.db]);
+// const http = require('http').createServer(app);
+// const path = require('path');
+// const util = require('./lib/util');
+// const config = require('./config');
+// const Excel = require('exceljs')
+// const schedule = require('node-schedule');
+// const moment = require('dayjs');
+// const knex = require('./lib/knex')('mysql', config[config.db]);
 const inquirer = require('inquirer')
 const chalk = require('chalk')
 const capex = require('./generate-budget-plan/capex');
@@ -63,9 +63,9 @@ run = async () => {
     process.exit(0);
   }
 
-  let budgetYear = '';
+  let budgetYear = '2023';
   let dateTime = '';
-  let contactPointDepartment = '';
+  let contactPointDepartment = 'ALL';
 
   if (menu === 'CAPEX') {
     await capex.generateBudgetPlanCAPEX(budgetYear, dateTime, contactPointDepartment)
