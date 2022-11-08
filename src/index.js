@@ -68,7 +68,7 @@ run = async () => {
   let contactPointDepartment = '';
 
   if (menu === 'CAPEX') {
-    await opex.generateBudgetPlanOPEX(budgetYear, dateTime, contactPointDepartment)
+    await capex.generateBudgetPlanCAPEX(budgetYear, dateTime, contactPointDepartment)
   } else if (menu === 'OPEX') {
     await opex.generateBudgetPlanOPEX(budgetYear, dateTime, contactPointDepartment)
   }
