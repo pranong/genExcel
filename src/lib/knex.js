@@ -17,7 +17,7 @@ module.exports = (dbName, config) => {
       }
       opt[key] = config[key]
     })
-    console.log('knex opt=', opt)
+    // console.log('knex opt=', opt)
     const knex = require('knex')(opt)
     dbPool[dbName] = knex
     if (process.env.DEBUG === '1') {
@@ -28,10 +28,10 @@ module.exports = (dbName, config) => {
       knex.on('query-response', (res, querySpec) => {
         let startTime = durations[querySpec.__knexQueryUid]
         if (!startTime) {
-          return console.log('no start time')
+          // return console.log('no start time')
         }
         if (process.env.DEBUG === '1') {
-          console.log(querySpec.__knexQueryUid, 'DURATION=', new Date().getTime() - startTime)
+          // console.log(querySpec.__knexQueryUid, 'DURATION=', new Date().getTime() - startTime)
         }
         delete durations[querySpec.__knexQueryUid]
       })
