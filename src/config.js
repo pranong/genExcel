@@ -9,7 +9,7 @@ if (process.env.TELECAR && !process.env.TELECAR_CODE) {
 
 module.exports = {
   secret: process.env.ACCESS_SECRET || "bezkoder-secret-key",
-  db: process.env.CLARET_DB || 'mysql',
+  db: process.env.SELECTED_DB || 'mysql',
 
   mysql: {
     driver: 'mysql',

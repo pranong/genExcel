@@ -57,20 +57,67 @@ run = async () => {
     choices: menuList,
   }).then(res => res.menu);
 
-  console.log(menu);
+  // console.log(menu);
 
   if (menu === 'EXIT') {
     process.exit(0);
   }
 
-  let budgetYear = '2023';
+  let budgetYear = '';
   let dateTime = '';
-  let contactPointDepartment = 'ALL';
+  let contactPointDepartment = '';
+  let context = {}
+  let conditionsList = []
 
+  conditionsList.push({ // donorNumber
+    type: 'input',
+    name: 'context',
+    message: `ENTER CONDITIONS:`,
+  })
+
+  await inquirer.prompt(conditionsList).then(res => {
+    let arr = [];
+    if (res.context) {
+      arr = res.context.split(' ')
+      if (arr.length) {
+        context = {
+          budgetYear: arr[0],
+          dateTime: arr[1],
+          contactPointDepartment: arr[2],
+        }
+      }
+    }
+    // context = JSON.parse(res.context);
+  })
+
+  console.log('context=', context);
+
+
+  let resp = true;
+  budgetYear = context.budgetYear;
+  dateTime = context.dateTime;
+  contactPointDepartment = context.contactPointDepartment;
   if (menu === 'CAPEX') {
-    await capex.generateBudgetPlanCAPEX(budgetYear, dateTime, contactPointDepartment)
+    resp = await capex.generateBudgetPlanCAPEX(budgetYear, dateTime, contactPointDepartment)
   } else if (menu === 'OPEX') {
-    await opex.generateBudgetPlanOPEX(budgetYear, dateTime, contactPointDepartment)
+    resp = await opex.generateBudgetPlanOPEX(budgetYear, dateTime, contactPointDepartment)
+  }
+
+  if (!resp) {
+    let con = await inquirer.prompt({
+      type: 'confirm',
+      name: 'continue',
+      message: `continue:`,
+      default: true,
+    }).then(res => res.continue)
+  
+    if (con) {
+      run();
+    } else {
+      process.exit(0);
+    }
+  } else {
+    process.exit(0);
   }
 }
 

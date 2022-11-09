@@ -8,6 +8,8 @@ async function run() {
   console.log('Oracle Test Code');
   let rows = await knex('dual');
   console.log('rows=', rows);
+
+  knex.destroy();
 }
 
 

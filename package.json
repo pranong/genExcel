@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node index",
-    "dev": "cross-env DEBUG=1 NODE_ENV=development nodemon index.js",
+    "dev": "cross-env DEBUG=1 NODE_ENV=development SELECTED_DB=precaldev02 node --max-old-space-size=4096 index",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "pnkrwk",
