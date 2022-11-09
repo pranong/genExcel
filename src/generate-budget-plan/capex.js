@@ -66,9 +66,9 @@ async function generateBudgetPlanCAPEX(budgetYear, dateTime, contactPointDepartm
     from main m
     )
     select 
-        null mock,null mock,budget_name,busines_function,business_group,business_owner_name,sub_project_product,project_priority,budget_company,cost_center,contact_point_budget_own_name,contact_point_department,contact_point_mobile,budget_amount_usd,budget_amount_thb,equivalent_to_thb,equivalent_to_usd,assumption_budget_calculation,project_description,hardware_total,software_license_total,software_dev_turnkey_total,software_dev_dbp_total,software_dev_automate_total,external_outsourcing_total,outsource_total_total,outsource_pm_si_total,outsource_sa_total,outsource_pa_total,outsource_tester_total,outsource_ts_total,outsource_tc_total,null mock,plan_use_jan,plan_use_feb,plan_use_mar,plan_use_apr,plan_use_may,plan_use_jun,plan_use_jul,plan_use_aug,plan_use_sep,plan_use_oct,plan_use_nov,plan_use_dec,plan_use_total,null mock,forecast_inv_cur_jan,forecast_inv_cur_feb,forecast_inv_cur_mar,forecast_inv_cur_apr,forecast_inv_cur_may,forecast_inv_cur_jun,forecast_inv_cur_jul,forecast_inv_cur_aug,forecast_inv_cur_sep,forecast_inv_cur_oct,forecast_inv_cur_nov,forecast_inv_cur_dec,forecast_inv_cur_total,null mock,forecast_inv_next_jan,forecast_inv_next_feb,forecast_inv_next_mar,forecast_inv_next_apr,forecast_inv_next_may,forecast_inv_next_jun,forecast_inv_next_jul,forecast_inv_next_aug,forecast_inv_next_sep,forecast_inv_next_oct,forecast_inv_next_nov,forecast_inv_next_dec,forecast_inv_next_total,investment_Level_1 lvl1,investment_Level_2 lvl2,investment_Level_3 lvl3,investment_Level_4 lvl4, date_time
+        null mock,null mock,budget_name,busines_function,business_group,business_owner_name,sub_project_product,project_priority,budget_company,cost_center,contact_point_budget_own_name,contact_point_department,contact_point_mobile,budget_amount_usd,budget_amount_thb,equivalent_to_thb,equivalent_to_usd,assumption_budget_calculation,project_description,hardware_total,software_license_total,software_dev_turnkey_total,software_dev_dbp_total,software_dev_automate_total,external_outsourcing_total,outsource_total_total,outsource_pm_si_total,outsource_sa_total,outsource_pa_total,outsource_tester_total,outsource_ts_total,outsource_tc_total,null mock,plan_use_jan,plan_use_feb,plan_use_mar,plan_use_apr,plan_use_may,plan_use_jun,plan_use_jul,plan_use_aug,plan_use_sep,plan_use_oct,plan_use_nov,plan_use_dec,plan_use_total,null mock,forecast_inv_cur_jan,forecast_inv_cur_feb,forecast_inv_cur_mar,forecast_inv_cur_apr,forecast_inv_cur_may,forecast_inv_cur_jun,forecast_inv_cur_jul,forecast_inv_cur_aug,forecast_inv_cur_sep,forecast_inv_cur_oct,forecast_inv_cur_nov,forecast_inv_cur_dec,forecast_inv_cur_total,null mock,forecast_inv_next_jan,forecast_inv_next_feb,forecast_inv_next_mar,forecast_inv_next_apr,forecast_inv_next_may,forecast_inv_next_jun,forecast_inv_next_jul,forecast_inv_next_aug,forecast_inv_next_sep,forecast_inv_next_oct,forecast_inv_next_nov,forecast_inv_next_dec,forecast_inv_next_total,CASE WHEN investment_Level_1 IS NOT NULL THEN investment_Level_1 ELSE '6. Other' END lvl1,CASE WHEN investment_Level_2 IS NOT NULL THEN investment_Level_2 ELSE '6. Other' END lvl2,investment_Level_3 lvl3,investment_Level_4 lvl4, date_time
     from gen
-    where budget_year = '${budgetYear}' and date_time = to_date('${dateTime}', 'YYYY-MM-DD') ${contactPointDepartment === 'ALL' ? '' : `and CONTACT_POINT_DEPARTMENT = '${contactPointDepartment}'`}
+    -- where budget_year = '${budgetYear}' and date_time = to_date('${dateTime}', 'YYYY-MM-DD') ${contactPointDepartment === 'ALL' ? '' : `and CONTACT_POINT_DEPARTMENT = '${contactPointDepartment}'`}
     order by neworder1, neworder2, neworder3, neworder4
     `)
 
@@ -80,15 +80,20 @@ async function generateBudgetPlanCAPEX(budgetYear, dateTime, contactPointDepartm
     // Re-arrange data
     // Set split No. and Name
     rows = rows.map(x => {
+        x.lvl1 = x.lvl1 && x.lvl1.replace('  ', ' ')
+        x.lvl2 = x.lvl2 && x.lvl2.replace('  ', ' ')
+        x.lvl3 = x.lvl3 && x.lvl3.replace('  ', ' ')
+        x.lvl4 = x.lvl4 && x.lvl4.replace('  ', ' ')
+
         x.lvl1No = x.lvl1 && x.lvl1.substring(0, x.lvl1.indexOf(' ')) || null
         x.lvl2No = x.lvl2 && x.lvl2.substring(0, x.lvl2.indexOf(' ')) || null
         x.lvl3No = x.lvl3 && x.lvl3.substring(0, x.lvl3.indexOf(' ')) || null
         x.lvl4No = x.lvl4 && x.lvl4.substring(0, x.lvl4.indexOf(' ')) || null
 
-        x.lvl1Name = x.lvl1 && x.lvl1.substring(x.lvl1.indexOf(' ') + 1) || null
-        x.lvl2Name = x.lvl2 && x.lvl2.substring(x.lvl2.indexOf(' ') + 1) || null
-        x.lvl3Name = x.lvl3 && x.lvl3.substring(x.lvl3.indexOf(' ') + 1) || null
-        x.lvl4Name = x.lvl4 && x.lvl4.substring(x.lvl4.indexOf(' ') + 1) || null
+        x.lvl1Name = x.lvl1 && x.lvl1.substring(x.lvl1.indexOf(' ') + 1).trim() || null
+        x.lvl2Name = x.lvl2 && x.lvl2.substring(x.lvl2.indexOf(' ') + 1).trim() || null
+        x.lvl3Name = x.lvl3 && x.lvl3.substring(x.lvl3.indexOf(' ') + 1).trim() || null
+        x.lvl4Name = x.lvl4 && x.lvl4.substring(x.lvl4.indexOf(' ') + 1).trim() || null
         return x
     })
     
@@ -175,7 +180,7 @@ async function generateBudgetPlanCAPEX(budgetYear, dateTime, contactPointDepartm
         // check next if over push total
         let tmpItem = rows[i + 1]
         if (tmpItem) {
-            if ((!level[3] || (level[3] && level[3] !== tmpItem.lvl4)) && tmpItem.lvl4 && item.lvl4) {
+            if ((!level[3] || (level[3] && level[3] !== tmpItem.lvl4)) && item.lvl4) {
                 if (lastSubRow) {
                     arranged.push({mock: null})
                     pos++
@@ -189,7 +194,7 @@ async function generateBudgetPlanCAPEX(budgetYear, dateTime, contactPointDepartm
                 nowLvl = 4
                 lastSubRow = false
             }
-            if ((!level[2] || (level[2] && level[2] !== tmpItem.lvl3)) && tmpItem.lvl3 && item.lvl3) {
+            if ((!level[2] || (level[2] && level[2] !== tmpItem.lvl3)) && item.lvl3) {
                 if (lastSubRow) {
                     arranged.push({mock: null})
                     pos++
@@ -204,7 +209,7 @@ async function generateBudgetPlanCAPEX(budgetYear, dateTime, contactPointDepartm
                 nowLvl = 3
                 lastSubRow = false
             }
-            if ((!level[1] || (level[1] && level[1] !== tmpItem.lvl2)) && tmpItem.lvl2 && item.lvl2) {
+            if ((!level[1] || (level[1] && level[1] !== tmpItem.lvl2)) && item.lvl2) {
                 if (lastSubRow) {
                     arranged.push({mock: null})
                     pos++
@@ -219,7 +224,7 @@ async function generateBudgetPlanCAPEX(budgetYear, dateTime, contactPointDepartm
                 nowLvl = 2
                 lastSubRow = false
             }
-            if ((!level[0] || (level[0] && level[0] !== tmpItem.lvl1)) && tmpItem.lvl1 && item.lvl1) {
+            if ((!level[0] || (level[0] && level[0] !== tmpItem.lvl1)) && item.lvl1) {
                 if (lastSubRow) {
                     arranged.push({mock: null})
                     pos++
