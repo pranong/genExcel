@@ -36,17 +36,18 @@ async function generateBudgetPlanCAPEX(budgetYear, dateTime, contactPointDepartm
         return false;
     }
 
-    const isNum = new RegExp('^[0-9]+$');
-    if (!isNum.test(budgetYear)) {
+    const isbudgetYear = new RegExp('^[0-9]{4,4}$');
+    if (!isbudgetYear.test(budgetYear)) {
         console.log('');
         console.log(chalk.white.bgRed.bold(' [budgetYear] - Should be in year format - Ex: 2022 '));
         console.log('');
         console.log('Should be in datetime format: 2022');
         return false
     }
-    if (!isNum.test(dateTime)) {
+    const isdateTime = new RegExp('^[0-9]{8,8}$');
+    if (!isdateTime.test(dateTime)) {
         console.log('');
-        console.log(chalk.white.bgRed.bold(' [dateTime] - Should be in datetime format - Ex: 2022010 '));
+        console.log(chalk.white.bgRed.bold(' [dateTime] - Should be in datetime format - Ex: 20220101 '));
         console.log('');
         return false
     }
