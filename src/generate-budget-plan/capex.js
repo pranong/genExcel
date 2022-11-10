@@ -16,38 +16,88 @@ async function generateBudgetPlanCAPEX(budgetYear, dateTime, contactPointDepartm
     // verrify data
     console.log('Verrify data...')
     if (!budgetYear) {
-        console.log('budgetYear required');
+        console.log('');
+        console.log(chalk.white.bgRed.bold(' budgetYear required '));
+        console.log('');
         return false;
     }
     
     if (!dateTime) {
-        console.log('dateTime required');
+        console.log('');
+        console.log(chalk.white.bgRed.bold(' dateTime required '));
+        console.log('');
         return false;
     }
 
     if (!contactPointDepartment) {
-        console.log('contactPointDepartment required');
+        console.log('');
+        console.log(chalk.white.bgRed.bold(' contactPointDepartment required '));
+        console.log('');
         return false;
+    }
+
+    const isNum = new RegExp('^[0-9]+$');
+    if (!isNum.test(budgetYear)) {
+        console.log('');
+        console.log(chalk.white.bgRed.bold(' [budgetYear] - Should be in year format - Ex: 2022 '));
+        console.log('');
+        console.log('Should be in datetime format: 2022');
+        return false
+    }
+    if (!isNum.test(dateTime)) {
+        console.log('');
+        console.log(chalk.white.bgRed.bold(' [dateTime] - Should be in datetime format - Ex: 2022010 '));
+        console.log('');
+        return false
     }
 
     if (dateTime && dateTime.indexOf('-') === -1) {
         dateTime = moment(moment(dateTime).format('YYYYMMDD')).format('YYYY-MM-DD');
     }
 
+    // get data
+    console.log('Fetching data...')
+    let teamList = []
+    if (contactPointDepartment === 'TEAM') {
+        teamList = await knex('planBudgetCapex').select(knex.raw(`distinct(contact_Point_Department)`)).then(item => item = item.map(e => e = e.contactPointDepartment))
+        console.log('teamList', teamList)
+    } else {
+        teamList.push(contactPointDepartment)
+    }
+
+    let conclusion = []
+    for (let i = 0; i < teamList.length; i++) {
+        const team = teamList[i];
+        let res = await generateMaster(budgetYear, dateTime, team)
+        conclusion.push(res)
+    }
+
+    console.log('');
+    console.log('');
+    console.log(chalk.white.bgBlue.bold(' CONCLUSION '));
+    console.log('');
+    for (let i = 0; i < conclusion.length; i++) {
+        const item = conclusion[i];
+        if (!item.status) {
+            console.log(chalk.white.bgRed.bold(' FAILED '), `[${item.team}] -  ERROR: ${item.message}`);
+        }
+        // else {
+        //     console.log(chalk.white.bgGreen.bold(' Generate ' + item.team + ' Successfully '));
+        // }
+    }
+}
+
+async function generateMaster(budgetYear, dateTime, contactPointDepartment) {
     // import template for header
-    console.log('Importing template...')
+    console.log('');
+    console.log('TEAM:', contactPointDepartment)
+    // console.log('Importing template...')
     let fileName = './src/generate-budget-plan/templates/TemplateCAPEX.xlsx'
     let wb = new Excel.Workbook();
     let ws
     await wb.xlsx.readFile(fileName).then(function() {
         ws = wb.getWorksheet('Sheet1');
     });
-
-    // get data
-    console.log('Fetching data...')
-    // let select = `null mock,null mock,budget_name,busines_function,business_group,business_owner_name,sub_project_product,project_priority,budget_company,cost_center,contact_point_budget_own_name,contact_point_department,contact_point_mobile,budget_amount_usd,budget_amount_thb,equivalent_to_thb,equivalent_to_usd,assumption_budget_calculation,project_description,hardware_total,software_license_total,software_dev_turnkey_total,software_dev_dbp_total,software_dev_automate_total,external_outsourcing_total,outsource_total_total,outsource_pm_si_total,outsource_sa_total,outsource_pa_total,outsource_tester_total,outsource_ts_total,outsource_tc_total,null mock,plan_use_jan,plan_use_feb,plan_use_mar,plan_use_apr,plan_use_may,plan_use_jun,plan_use_jul,plan_use_aug,plan_use_sep,plan_use_oct,plan_use_nov,plan_use_dec,plan_use_total,null mock,forecast_inv_cur_jan,forecast_inv_cur_feb,forecast_inv_cur_mar,forecast_inv_cur_apr,forecast_inv_cur_may,forecast_inv_cur_jun,forecast_inv_cur_jul,forecast_inv_cur_aug,forecast_inv_cur_sep,forecast_inv_cur_oct,forecast_inv_cur_nov,forecast_inv_cur_dec,forecast_inv_cur_total,null mock,forecast_inv_next_jan,forecast_inv_next_feb,forecast_inv_next_mar,forecast_inv_next_apr,forecast_inv_next_may,forecast_inv_next_jun,forecast_inv_next_jul,forecast_inv_next_aug,forecast_inv_next_sep,forecast_inv_next_oct,forecast_inv_next_nov,forecast_inv_next_dec,forecast_inv_next_total,investment_Level_1 lvl1,investment_Level_2 lvl2,investment_Level_3 lvl3,investment_Level_4 lvl4`
-    // rows = await knex('planBudgetCapex').select(knex.raw(select)).where('budgetYear', '2023').orderBy('investmentLevel_1').orderBy('investmentLevel_2').orderBy('investmentLevel_3').orderBy('investmentLevel_4')
-    budgetYear = '2023'
     let rows = await knex.raw(`
     with main as (
         select
@@ -73,8 +123,8 @@ async function generateBudgetPlanCAPEX(budgetYear, dateTime, contactPointDepartm
     `)
 
     if (!rows.length) {
-        console.log('No DATA')
-        return false
+        console.log(chalk.white.bgRed.bold(' No DATA '));
+        return {status: false, message: 'No DATA', team: contactPointDepartment}
     }
 
     // Re-arrange data
@@ -127,10 +177,10 @@ async function generateBudgetPlanCAPEX(budgetYear, dateTime, contactPointDepartm
     let lastSubRow = false
     for (let i = 0; i < rows.length; i++) {
         const item = rows[i];
+        // Header
         if ((!level[0] || (level[0] && level[0] !== item.lvl1)) && item.lvl1) {
             level[0] = item.lvl1
             arranged.push({lvl1: item.lvl1})
-            // arranged.push({lvl1No: item.lvl1No, lvl1Name: item.lvl1Name})
             levelStyle.lvl1.push(pos)
             nowLvlTotal = 1
             pos++
@@ -157,7 +207,7 @@ async function generateBudgetPlanCAPEX(budgetYear, dateTime, contactPointDepartm
             pos++
         }
 
-        // push data
+        // Data
         arranged.push(item)
         lastSubRow = true
         levelStyle.lvl5.push(pos)
@@ -177,6 +227,7 @@ async function generateBudgetPlanCAPEX(budgetYear, dateTime, contactPointDepartm
         }
         pos++
 
+        // Total
         // check next if over push total
         let tmpItem = rows[i + 1]
         if (tmpItem) {
@@ -191,7 +242,6 @@ async function generateBudgetPlanCAPEX(budgetYear, dateTime, contactPointDepartm
                 pos++
                 arranged.push({mock: null})
                 pos++
-                nowLvl = 4
                 lastSubRow = false
             }
             if ((!level[2] || (level[2] && level[2] !== tmpItem.lvl3)) && item.lvl3) {
@@ -206,7 +256,6 @@ async function generateBudgetPlanCAPEX(budgetYear, dateTime, contactPointDepartm
                 pos++
                 arranged.push({mock: null})
                 pos++
-                nowLvl = 3
                 lastSubRow = false
             }
             if ((!level[1] || (level[1] && level[1] !== tmpItem.lvl2)) && item.lvl2) {
@@ -221,7 +270,6 @@ async function generateBudgetPlanCAPEX(budgetYear, dateTime, contactPointDepartm
                 pos++
                 arranged.push({mock: null})
                 pos++
-                nowLvl = 2
                 lastSubRow = false
             }
             if ((!level[0] || (level[0] && level[0] !== tmpItem.lvl1)) && item.lvl1) {
@@ -236,11 +284,11 @@ async function generateBudgetPlanCAPEX(budgetYear, dateTime, contactPointDepartm
                 pos++
                 arranged.push({mock: null})
                 pos++
-                nowLvl = 1
                 lastSubRow = false
             }
         } else {
             // last item
+            nowLvl = item.lvl4 ? 4 : item.lvl3 ? 3 : item.lvl2 ? 2 : 1
             arranged.push({mock: null})
             pos++
             arranged.push({mock: null, lvlx: 'TOTAL FOR ' + item[`lvl${nowLvl}Name`] + ' ' + countLvl[`lvl${nowLvl}`]})
@@ -291,11 +339,10 @@ async function generateBudgetPlanCAPEX(budgetYear, dateTime, contactPointDepartm
                 arranged.push({mock: null})
                 pos++
             }
+            
         }
     }
     // Set Grand total
-    // arranged.push({mock: null})
-    // pos++
     arranged.push({mock: null, lvlx: `GRAND TOTAL FOR CAPEX INVESTMENT Y${budgetYear} ` + countLvl.g })
     levelStyle[`lvlGTotal`].push(pos)
 
@@ -436,17 +483,18 @@ async function generateBudgetPlanCAPEX(budgetYear, dateTime, contactPointDepartm
             
         });
     });
+
     console.log('Saving file...')
     let res = await writeFilePromise;
     if (res.status) {
-        console.log('');
-        console.log(chalk.white.bgGreen.bold(' ' + res.message + ' '));
-        console.log('');
+        console.log(chalk.white.bgGreen.bold(' SUCCESS '));
+        return {...res, team: contactPointDepartment}
     }
 
     if (!res.status) {
-        console.log(res.message);
-        knex.destroy();
-        process.exit();
+        console.log(chalk.white.bgRed.bold(' ' + res.message + ' '));
+        return {...res, team: contactPointDepartment}
+        // knex.destroy();
+        // process.exit();
     }
 }
