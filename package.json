@@ -5,32 +5,26 @@
   "main": "index.js",
   "scripts": {
     "start": "node index",
-    "dev": "cross-env DEBUG=1 NODE_ENV=development SELECTED_DB=precaldev02 node --max-old-space-size=4096 index",
+    "dev": "cross-env DEBUG=1 NODE_ENV=development SELECTED_DB=dbPlanBudget node --max-old-space-size=4096 index",
+    "dev-debug:0": "cross-env DEBUG=0 NODE_ENV=development SELECTED_DB=dbPlanBudget node --max-old-space-size=4096 index",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "pnkrwk",
   "license": "ISC",
   "dependencies": {
-    "bcryptjs": "^2.4.3",
     "body-parser": "^1.19.2",
     "chalk": "^4.1.2",
     "cors": "^2.8.5",
     "cross-env": "^7.0.3",
     "dayjs": "^1.11.5",
-    "docx-templates": "^4.9.2",
     "dotenv": "^16.0.2",
     "exceljs": "^4.3.0",
     "express": "^4.17.3",
     "inquirer": "^8.0.0",
-    "jsonwebtoken": "^8.5.1",
     "knex": "^2.3.0",
     "mkdirp": "^1.0.4",
-    "mysql": "^2.18.1",
-    "mysql2": "^2.3.3",
     "node-schedule": "^2.1.0",
     "nodemon": "^2.0.20",
-    "oracledb": "^5.5.0",
-    "sequelize": "^6.17.0",
-    "sqlite3": "^5.1.1"
+    "oracledb": "^5.5.0"
   }
 }

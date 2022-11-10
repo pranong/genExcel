@@ -1,8 +1,11 @@
 const Excel = require('exceljs')
 const config = require('../config');
-const knex = require('../lib/knex')('mysql', config[config.db]);
+const knex = require('../lib/knex')('dbPlanBudget', config[config.db]);
 const dayjs = require('dayjs');
 const chalk = require('chalk');
+const path = require('path')
+const mkdirp = require('mkdirp')
+
 module.exports = {
     generateBudgetPlanOPEX
 }
@@ -31,25 +34,43 @@ async function generateBudgetPlanOPEX(budgetYear, dateTime, contactPointDepartme
         dateTime = dayjs(dayjs(dateTime).format('YYYYMMDD')).format('YYYY-MM-DD');
     }
 
+    if (contactPointDepartment.toUpperCase() === 'TEAM' || contactPointDepartment.toUpperCase() === 'TEAMS') {
+        let queryTeam = knex('pmr.planBudgetOpex as pbo')
+        .where('pbo.budgetYear', (('' + budgetYear).trim()) || '')
+        .where('pbo.dateTime', knex.raw(`to_date('${dateTime}', 'YYYY-MM-DD')`))
+        .distinct(knex.raw(`nvl(pbo.deapartment_owner, 'NULL') team`)); // NVL("PBO"."DEAPARTMENT_OWNER", 'NULL')
+        let rows = await queryTeam;
+        for (const row of rows) {
+            await generateBudgetPlanOPEX(budgetYear, dateTime, row.team)
+        }
+
+        return true;
+    }
+
     let vendorNameList = [
-        'AIS (1100)',
-        'AWN (1200)',
-        'WDS (1400)',
-        'MMT (1500)',
-        'FXL (1600)',
-        'AMP (1700)',
-        'SBN (1800)',
-        'AIN (1900)',
-        'ACC (2000)',
-        'ABN (2500)'
+        'AIS', // 'AIS (1100)',
+        'AWN', // 'AWN (1200)',
+        'WDS', // 'WDS (1400)',
+        'MMT', // 'MMT (1500)',
+        'FXL', // 'FXL (1600)',
+        'AMP', // 'AMP (1700)',
+        'SBN', // 'SBN (1800)',
+        'AIN', // 'AIN (1900)',
+        'ACC', // 'ACC (2000)',
+        'ABN', // 'ABN (2500)',
     ]
+    let headerCols = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L'
+        ,'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'
+        ,'AA', 'AB', 'AC', 'AD', 'AE', 'AF', 'AG', 'AH', 'AI', 'AJ', 'AK', 'AL'
+        ,'AM', 'AN', 'AO', 'AP'];
+    let numFmtCols = ['N', 'O', 'P', 'Q', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'AA', 'AB', 'AC'
+        ,'AD', 'AE', 'AF', 'AG', 'AH', 'AI', 'AJ', 'AK', 'AL', 'AM', 'AN', 'AO', 'AP']
     let fileName = 'src/generate-budget-plan/templates/TemplateOPEX.xlsx';
     let wb = new Excel.Workbook();
     let ws = await wb.xlsx.readFile(fileName).then(() => wb.getWorksheet('Sheet1'));
     let query = knex('pmr.planBudgetOpex as pbo')
     .where('pbo.budgetYear', (('' + budgetYear).trim()) || '')
     .where('pbo.dateTime', knex.raw(`to_date('${dateTime}', 'YYYY-MM-DD')`))
-    .where('pbo.deapartmentOwner', (('' + contactPointDepartment).trim()) || '')
     .select([
         'budgetYear',
         'budgetType',
@@ -93,34 +114,110 @@ async function generateBudgetPlanOPEX(budgetYear, dateTime, contactPointDepartme
         'nextOct',
         'nextNov',
         'nextDec',
-    ])
+    ]);
     
     // set header
     ws.getCell('A1').value = 'IT OPEX ' + (dayjs().add(1, 'year').format('YYYY')).toString();
-    // ws.getRow(1).values[1] = 
-    // console.log(ws.getRow(1).values[1]);
 
     // table 1 external
-    let externalRows = await query.whereNotIn('pbo.vendorName', vendorNameList);
-    // console.log('externalRows=', externalRows);
-    let rowNum = 5;
-    let ok = true;
-    for (const row of externalRows) {
-        const excelRow = ws.getRow(rowNum);
-        // console.log('setupRow=', await setupRow(row));
-        excelRow.values = await setupRow(row);
-        ws.getCell('S' + rowNum).numFmt = '#,##0.00;[Red]-#,##0.00';
-
-        rowNum++ // next row excel
+    if (!['ALL', 'NULL'].includes(contactPointDepartment.toUpperCase())) {
+        query.where(knex.raw('upper(pbo.deapartment_owner)'), (('' + contactPointDepartment).trim()).toUpperCase() || '');
+    } else if (['NULL'].includes(contactPointDepartment.toUpperCase())) {
+        query.where((q) => {
+            q.whereNull('pbo.deapartmentOwner')
+        })
     }
 
-    // ws.getCell('S5').numFmt = '#,##0.00;[Red]-#,##0.00';
-    // ws.getCell('S6').numFmt = '#,##0.00;[Red]-#,##0.00';
+    let queryInternal = query.clone();
+    let queryExternal = query.clone();
+    let externalData = await queryExternal
+    .where((vd) =>{
+        vd.whereNotIn('pbo.vendorName', vendorNameList)
+        vd.orWhereNull('pbo.vendorName')
+    });
+    // console.log('externalData=', externalData);
+    let ok = true;
+    let latestRowEx = 0;
+    if (externalData.length) {
+        let exRowLatest = 5;
+        for (const [index, exRow] of externalData.entries()) {
+            const excelRow = ws.getRow(exRowLatest);
+            excelRow.values = await setupRow(exRow);
+            for (const f of numFmtCols) {
+                ws.getCell(f + exRowLatest).numFmt = '#,##0.00;[Red]-#,##0.00';
+            }
+
+            for (const h of headerCols) {
+                if ((index + 1) === externalData.length) {
+                    ws.getCell(h + exRowLatest).border = { 
+                        top: {style:'dotted'},
+                        left: {style:'thin'},
+                        bottom: {style:'thin'},
+                        right: {style:'thin'}
+                    };
+                } else {
+                    ws.getCell(h + exRowLatest).border = { 
+                        top: {style:'dotted'},
+                        left: {style:'thin'},
+                        bottom: {style:'dotted'},
+                        right: {style:'thin'}
+                    };
+                }
+            }
+            
+            exRowLatest++; // next row excel
+            ws.insertRow(exRowLatest, []);
+        }
+
+        latestRowEx = exRowLatest;
+    }
+
     // table 2 internal
+    let internalData = await queryInternal.whereIn('pbo.vendorName', vendorNameList);
+    if (internalData.length) {
+        if (!externalData.length) {
+            latestRowEx = 5;
+        }
+
+        let inRowLatest = latestRowEx + 11;
+        for (const [index, inRow] of internalData.entries()) {
+            const excelRow = ws.getRow(inRowLatest);
+            excelRow.values = await setupRow(inRow);
+            for (const f of numFmtCols) {
+                ws.getCell(f + inRowLatest).numFmt = '#,##0.00;[Red]-#,##0.00';
+            }
+
+            for (const h of headerCols) {
+                if ((index + 1) === internalData.length) {
+                    ws.getCell(h + inRowLatest).border = { 
+                        top: {style:'dotted'},
+                        left: {style:'thin'},
+                        bottom: {style:'thin'},
+                        right: {style:'thin'}
+                    };
+                } else {
+                    ws.getCell(h + inRowLatest).border = { 
+                        top: {style:'dotted'},
+                        left: {style:'thin'},
+                        bottom: {style:'dotted'},
+                        right: {style:'thin'}
+                    };
+                }
+            }
+
+            inRowLatest++;
+        }
+    }
+
+    if (!externalData.length && !internalData.length) {
+        ok = false;
+    }
 
     if (ok) {
-        let deapartmentOwner = contactPointDepartment.replaceAll(/[<>:"\/\\|?*]+/g, '-')
-        let writeFileName = `Template Budget OPEX ${budgetYear} - ${deapartmentOwner}.xlsx`;
+        let deapartmentOwner = contactPointDepartment.replaceAll(/[<>:"\/\\|?*]+/g, '_')
+        let xlsxName = `Template Budget OPEX ${budgetYear} - ${deapartmentOwner.toUpperCase()}.xlsx`;
+        let writeFileName = path.resolve('./public/files-opex/'+ xlsxName);
+        ws.name = 'OPEX_' + budgetYear;
         // console.log('Write file:', writeFileName);
         const writeFilePromise = new Promise((resolve, reject) => {
             wb.xlsx.writeFile(writeFileName)
@@ -136,7 +233,7 @@ async function generateBudgetPlanOPEX(budgetYear, dateTime, contactPointDepartme
         let res = await writeFilePromise;
         if (res.status) {
             console.log('');
-            console.log(chalk.white.bgGreen.bold(' ' + res.message + ' '));
+            console.log(chalk.white.bgGreen.bold(' ' + res.message + ' ') + ' ' + xlsxName);
             console.log('');
         }
 
@@ -147,8 +244,14 @@ async function generateBudgetPlanOPEX(budgetYear, dateTime, contactPointDepartme
         }
     }
 
+    if (!ok) {
+        console.log('');
+        console.log(chalk.white.bgMagenta.bold(' Data not found... '));
+        console.log('');
+    }
+
     // return false;
-    knex.destroy();
+    // knex.destroy();
 
     return true;
 }
@@ -167,7 +270,17 @@ async function setupRow(row) {
         res.push(row.businessFunction);
         res.push(row.deapartmentOwner);
         res.push(row.budgetOwnerName);
-        res.push(row.contactPointMobile);
+        if (row.contactPointMobile) {
+            let contactNumber = row.contactPointMobile.replaceAll(/(\-+|\s+|\_+)/g, '');
+            if (Number(contactNumber) > 0) {
+                let strContactNumber = contactNumber.substring(0, 3)+ '-' + contactNumber.substring(3, 6)+ '-' + contactNumber.substring(6, contactNumber.length);
+                res.push(strContactNumber);
+            } else {
+                res.push(null);
+            }
+        } else {
+            res.push(row.contactPointMobile);
+        }
         res.push(row.budgetAssumption);
         res.push(row.vendorName);
         res.push(row.poValueAmountUsd);
