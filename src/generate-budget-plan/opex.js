@@ -216,7 +216,10 @@ async function generateBudgetPlanOPEX(budgetYear, dateTime, contactPointDepartme
     if (ok) {
         let deapartmentOwner = contactPointDepartment.replaceAll(/[<>:"\/\\|?*]+/g, '_')
         let xlsxName = `Template Budget OPEX ${budgetYear} - ${deapartmentOwner.toUpperCase()}.xlsx`;
-        let writeFileName = path.resolve('./public/files-opex/'+ xlsxName);
+        // console.log(path.resolve(process.env.OPEX_FOLDER_PATH + '/' + xlsxName));
+        await mkdirp(path.resolve(process.env.OPEX_FOLDER_PATH));
+        await new Promise((resolve, reject) => setTimeout(resolve, 555));
+        let writeFileName = path.resolve(process.env.OPEX_FOLDER_PATH + '/' + xlsxName);
         ws.name = 'OPEX_' + budgetYear;
         // console.log('Write file:', writeFileName);
         const writeFilePromise = new Promise((resolve, reject) => {

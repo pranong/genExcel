@@ -2,28 +2,16 @@ const express = require('express');
 const app = express();
 const cors = require('cors');
 const path = require('path');
-// const fsp = require('fs').promises;
-// const bodyParser = require('body-parser');
-// const fs = require('fs')
-// const http = require('http').createServer(app);
-// const path = require('path');
-// const util = require('./lib/util');
-// const config = require('./config');
-// const Excel = require('exceljs')
-// const schedule = require('node-schedule');
-// const moment = require('dayjs');
-// const knex = require('./lib/knex')('mysql', config[config.db]);
 const inquirer = require('inquirer');
-const chalk = require('chalk');
 const capex = require('./generate-budget-plan/capex');
 const opex = require('./generate-budget-plan/opex');
-const { exec } = require("child_process");
-const spawnObj = require('child_process').spawn;
+const cp = require("child_process");
 const menuList = [
   new inquirer.Separator(),
   'CAPEX',
   'OPEX',
   new inquirer.Separator(),
+  'SET->.env',
   'EXIT',
 ];
 let nextList = ['CAPEX', 'OPEX'];
@@ -61,9 +49,8 @@ run = async () => {
 
   // console.log(menu);
 
-  if (menu === 'SET->.ENV') {
-    // console.log('.env=', path.resolve('.env'));
-    // spawnObj('C:\\windows\\notepad.exe', [path.resolve('.env')]);
+  if (menu === 'SET->.env') {
+    await executeCommand('C:\\windows\\notepad.exe', [path.resolve('.env')])
   } else if (menu === 'EXIT') {
     process.exit(0);
   }
@@ -144,6 +131,11 @@ run = async () => {
   //   process.exit(0);
   // }
 }
+
+const executeCommand = (textToExecute, arrayList) => new Promise(resolve => {
+  const command = cp.spawn(textToExecute, arrayList, { shell: true })
+  command.on('close', () => resolve())
+})
 
 
 run()
