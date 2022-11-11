@@ -75,10 +75,12 @@ async function generateBudgetPlanCAPEX(budgetYear, dateTime, contactPointDepartm
         conclusion.push(res)
     }
 
-    console.log('');
-    console.log('');
-    console.log(chalk.white.bgBlue.bold(' CONCLUSION '));
-    console.log('');
+    if (conclusion.filter(e => !e.status).length) {
+        console.log('');
+        console.log('');
+        console.log(chalk.white.bgBlue.bold(' FAILED CONCLUSION '));
+        console.log('');
+    }
     for (let i = 0; i < conclusion.length; i++) {
         const item = conclusion[i];
         if (!item.status) {
@@ -122,11 +124,105 @@ async function generateMaster(budgetYear, dateTime, contactPointDepartment) {
     from main m
     )
     select 
-        null mock,null mock,budget_name,busines_function,business_group,business_owner_name,sub_project_product,project_priority,budget_company,cost_center,contact_point_budget_own_name,contact_point_department,contact_point_mobile,budget_amount_usd,budget_amount_thb,equivalent_to_thb,equivalent_to_usd,assumption_budget_calculation,project_description,hardware_total,software_license_total,software_dev_turnkey_total,software_dev_dbp_total,software_dev_automate_total,external_outsourcing_total,outsource_total_total,outsource_pm_si_total,outsource_sa_total,outsource_pa_total,outsource_tester_total,outsource_ts_total,outsource_tc_total,null mock,plan_use_jan,plan_use_feb,plan_use_mar,plan_use_apr,plan_use_may,plan_use_jun,plan_use_jul,plan_use_aug,plan_use_sep,plan_use_oct,plan_use_nov,plan_use_dec,plan_use_total,null mock,forecast_inv_cur_jan,forecast_inv_cur_feb,forecast_inv_cur_mar,forecast_inv_cur_apr,forecast_inv_cur_may,forecast_inv_cur_jun,forecast_inv_cur_jul,forecast_inv_cur_aug,forecast_inv_cur_sep,forecast_inv_cur_oct,forecast_inv_cur_nov,forecast_inv_cur_dec,forecast_inv_cur_total,null mock,forecast_inv_next_jan,forecast_inv_next_feb,forecast_inv_next_mar,forecast_inv_next_apr,forecast_inv_next_may,forecast_inv_next_jun,forecast_inv_next_jul,forecast_inv_next_aug,forecast_inv_next_sep,forecast_inv_next_oct,forecast_inv_next_nov,forecast_inv_next_dec,forecast_inv_next_total,CASE WHEN investment_Level_1 IS NOT NULL THEN investment_Level_1 ELSE '99. NULL' END lvl1,CASE WHEN investment_Level_2 IS NOT NULL THEN investment_Level_2 ELSE '99. NULL' END lvl2,investment_Level_3 lvl3,investment_Level_4 lvl4, date_time
+        NULL,NULL,budget_name,busines_function,business_group,business_owner_name,sub_project_product,project_priority,budget_company,cost_center,contact_point_budget_own_name,contact_point_department,contact_point_mobile,
+        NVL(budget_amount_usd, 0) budget_amount_usd,NVL(budget_amount_thb, 0) budget_amount_thb,NVL(equivalent_to_thb, 0) equivalent_to_thb,NVL(equivalent_to_usd, 0) equivalent_to_usd,
+        assumption_budget_calculation,project_description,
+        NVL(hardware_total, 0) hardware_total,NVL(software_license_total, 0) software_license_total,NVL(software_dev_turnkey_total, 0) software_dev_turnkey_total,NVL(software_dev_dbp_total, 0) software_dev_dbp_total,
+        NVL(software_dev_automate_total, 0) software_dev_automate_total,NVL(external_outsourcing_total, 0) external_outsourcing_total,NVL(outsource_total_total, 0) outsource_total_total,
+        NVL(outsource_pm_si_total, 0) outsource_pm_si_total,NVL(outsource_sa_total, 0) outsource_sa_total,NVL(outsource_pa_total, 0) outsource_pa_total,NVL(outsource_tester_total, 0) outsource_tester_total,
+        NVL(outsource_ts_total, 0) outsource_ts_total,NVL(outsource_tc_total, 0) outsource_tc_total,NULL,NVL(plan_use_jan, 0) plan_use_jan,NVL(plan_use_feb, 0) plan_use_feb,
+        NVL(plan_use_mar, 0) plan_use_mar,NVL(plan_use_apr, 0) plan_use_apr,NVL(plan_use_may, 0) plan_use_may,NVL(plan_use_jun, 0) plan_use_jun,NVL(plan_use_jul, 0) plan_use_jul,NVL(plan_use_aug, 0) plan_use_aug,
+        NVL(plan_use_sep, 0) plan_use_sep,NVL(plan_use_oct, 0) plan_use_oct,NVL(plan_use_nov, 0) plan_use_nov,NVL(plan_use_dec, 0) plan_use_dec,NVL(plan_use_total, 0) plan_use_total,NULL,
+        NVL(forecast_inv_cur_jan, 0) forecast_inv_cur_jan,NVL(forecast_inv_cur_feb, 0) forecast_inv_cur_feb,NVL(forecast_inv_cur_mar, 0) forecast_inv_cur_mar,NVL(forecast_inv_cur_apr, 0) forecast_inv_cur_apr,
+        NVL(forecast_inv_cur_may, 0) forecast_inv_cur_may,NVL(forecast_inv_cur_jun, 0) forecast_inv_cur_jun,NVL(forecast_inv_cur_jul, 0) forecast_inv_cur_jul,NVL(forecast_inv_cur_aug, 0) forecast_inv_cur_aug,
+        NVL(forecast_inv_cur_sep, 0) forecast_inv_cur_sep,NVL(forecast_inv_cur_oct, 0) forecast_inv_cur_oct,NVL(forecast_inv_cur_nov, 0) forecast_inv_cur_nov,NVL(forecast_inv_cur_dec, 0) forecast_inv_cur_dec,
+        NVL(forecast_inv_cur_total, 0) forecast_inv_cur_total,NULL,NVL(forecast_inv_next_jan, 0) forecast_inv_next_jan,NVL(forecast_inv_next_feb, 0) forecast_inv_next_feb,
+        NVL(forecast_inv_next_mar, 0) forecast_inv_next_mar,NVL(forecast_inv_next_apr, 0) forecast_inv_next_apr,NVL(forecast_inv_next_may, 0) forecast_inv_next_may,NVL(forecast_inv_next_jun, 0) forecast_inv_next_jun,
+        NVL(forecast_inv_next_jul, 0) forecast_inv_next_jul,NVL(forecast_inv_next_aug, 0) forecast_inv_next_aug,NVL(forecast_inv_next_sep, 0) forecast_inv_next_sep,NVL(forecast_inv_next_oct, 0) forecast_inv_next_oct,
+        NVL(forecast_inv_next_nov, 0) forecast_inv_next_nov,NVL(forecast_inv_next_dec, 0) forecast_inv_next_dec,NVL(forecast_inv_next_total, 0) forecast_inv_next_total,
+        CASE WHEN investment_Level_1 IS NOT NULL THEN investment_Level_1 ELSE '99. NULL' END lvl1,CASE WHEN investment_Level_2 IS NOT NULL THEN investment_Level_2 ELSE '99. NULL' END lvl2,
+        investment_Level_3 lvl3,investment_Level_4 lvl4, date_time
     from gen
     where budget_year = '${budgetYear}' and date_time = to_date('${dateTime}', 'YYYY-MM-DD')
             ${contactPointDepartment === 'ALL' ? '' : `and CONTACT_POINT_DEPARTMENT ${contactPointDepartment === 'NULL' ? 'IS NULL' : `= '${contactPointDepartment}'`}`}
     order by neworder1, neworder2, neworder3, neworder4
+    `)
+
+    // get total data
+    let totalRows = await knex.raw(`
+        with main as (
+            select
+                TRANS_DATE, DATE_TIME, FILE_NAME, BUDGET_YEAR, BUSINESS_OBJECTIVE, BUSINESS_STRATEGIC, BUDGET_NAME, NVL(BUDGET_AMOUNT_THB, 0) BUDGET_AMOUNT_THB, NVL(BUDGET_AMOUNT_USD, 0) BUDGET_AMOUNT_USD, NVL(EQUIVALENT_TO_THB, 0) EQUIVALENT_TO_THB, NVL(EQUIVALENT_TO_USD, 0) EQUIVALENT_TO_USD, C_LEVEL_TEAM, BUDGET_FLAG,
+                CASE WHEN investment_Level_1 IS NOT NULL THEN investment_Level_1 ELSE '99. NULL' END investment_Level_1,CASE WHEN investment_Level_2 IS NOT NULL THEN investment_Level_2 ELSE '99. NULL' END investment_Level_2,
+                INVESTMENT_LEVEL_3, INVESTMENT_LEVEL_4, BUSINES_FUNCTION, BUSINESS_GROUP, BUSINESS_OWNER_NAME, CATEGORY, SUB_PROJECT_PRODUCT, PROJECT_PRIORITY, BUDGET_COMPANY, COST_CENTER, CONTACT_POINT_BUDGET_OWN_NAME,
+                CONTACT_POINT_DEPARTMENT, CONTACT_POINT_MOBILE, TYPE_ABC, ASSUMPTION_BUDGET_CALCULATION, PROJECT_DESCRIPTION, HARDWARE_USD, HARDWARE_THB, SOFTWARE_LICENSE_USD, SOFTWARE_LICENSE_THB, SOFTWARE_DEV_TURNKEY_USD,
+                SOFTWARE_DEV_TURNKEY_THB, SOFTWARE_DEV_DBP_USD, SOFTWARE_DEV_DBP_THB, SOFTWARE_DEV_AUTOMATE_USD, SOFTWARE_DEV_AUTOMATE_THB, EXTERNAL_OUTSOURCING_USD, EXTERNAL_OUTSOURCING_THB, TOTAL_HW_SW_DBP_TURNKEY_USD,
+                TOTAL_HW_SW_DBP_TURNKEY_THB, OUTSOURCE_TOTAL_USD, OUTSOURCE_TOTAL_THB, OUTSOURCE_PM_SI_USD, OUTSOURCE_PM_SI_THB, OUTSOURCE_SA_USD, OUTSOURCE_SA_THB, OUTSOURCE_PA_USD, OUTSOURCE_PA_THB, OUTSOURCE_TESTER_USD,
+                OUTSOURCE_TESTER_THB, OUTSOURCE_TS_USD, OUTSOURCE_TS_THB, OUTSOURCE_TC_USD, OUTSOURCE_TC_THB, TOTAL_OUTSOURCE, NVL(PLAN_USE_JAN, 0) PLAN_USE_JAN, NVL(PLAN_USE_FEB, 0) PLAN_USE_FEB, NVL(PLAN_USE_MAR, 0) PLAN_USE_MAR, NVL(PLAN_USE_APR, 0) PLAN_USE_APR, NVL(PLAN_USE_MAY, 0) PLAN_USE_MAY, NVL(PLAN_USE_JUN, 0) PLAN_USE_JUN, NVL(PLAN_USE_JUL, 0) PLAN_USE_JUL,
+                NVL(PLAN_USE_AUG, 0) PLAN_USE_AUG, NVL(PLAN_USE_SEP, 0) PLAN_USE_SEP, NVL(PLAN_USE_OCT, 0) PLAN_USE_OCT, NVL(PLAN_USE_NOV, 0) PLAN_USE_NOV, NVL(PLAN_USE_DEC, 0) PLAN_USE_DEC, NVL(PLAN_USE_TOTAL, 0) PLAN_USE_TOTAL, NVL(FORECAST_INV_CUR_JAN, 0) FORECAST_INV_CUR_JAN, NVL(FORECAST_INV_CUR_FEB, 0) FORECAST_INV_CUR_FEB, NVL(FORECAST_INV_CUR_MAR, 0) FORECAST_INV_CUR_MAR, NVL(FORECAST_INV_CUR_APR, 0) FORECAST_INV_CUR_APR, NVL(FORECAST_INV_CUR_MAY, 0) FORECAST_INV_CUR_MAY,
+                NVL(FORECAST_INV_CUR_JUN, 0) FORECAST_INV_CUR_JUN, NVL(FORECAST_INV_CUR_JUL, 0) FORECAST_INV_CUR_JUL, NVL(FORECAST_INV_CUR_AUG, 0) FORECAST_INV_CUR_AUG, NVL(FORECAST_INV_CUR_SEP, 0) FORECAST_INV_CUR_SEP, NVL(FORECAST_INV_CUR_OCT, 0) FORECAST_INV_CUR_OCT, NVL(FORECAST_INV_CUR_NOV, 0) FORECAST_INV_CUR_NOV, NVL(FORECAST_INV_CUR_DEC, 0) FORECAST_INV_CUR_DEC, NVL(FORECAST_INV_CUR_TOTAL, 0) FORECAST_INV_CUR_TOTAL, NVL(FORECAST_INV_NEXT_JAN, 0) FORECAST_INV_NEXT_JAN,
+                NVL(FORECAST_INV_NEXT_FEB, 0) FORECAST_INV_NEXT_FEB, NVL(FORECAST_INV_NEXT_MAR, 0) FORECAST_INV_NEXT_MAR, NVL(FORECAST_INV_NEXT_APR, 0) FORECAST_INV_NEXT_APR, NVL(FORECAST_INV_NEXT_MAY, 0) FORECAST_INV_NEXT_MAY, NVL(FORECAST_INV_NEXT_JUN, 0) FORECAST_INV_NEXT_JUN, NVL(FORECAST_INV_NEXT_JUL, 0) FORECAST_INV_NEXT_JUL, NVL(FORECAST_INV_NEXT_AUG, 0) FORECAST_INV_NEXT_AUG, NVL(FORECAST_INV_NEXT_SEP, 0) FORECAST_INV_NEXT_SEP, NVL(FORECAST_INV_NEXT_OCT, 0) FORECAST_INV_NEXT_OCT,
+                NVL(FORECAST_INV_NEXT_NOV, 0) FORECAST_INV_NEXT_NOV, NVL(FORECAST_INV_NEXT_DEC, 0) FORECAST_INV_NEXT_DEC, NVL(FORECAST_INV_NEXT_TOTAL, 0) FORECAST_INV_NEXT_TOTAL, NVL(FORECAST_INV_TOTAL, 0) FORECAST_INV_TOTAL, INVOICE_FORECAST_2024, ASSUMPTION_2024, INVOICE_FORECAST_2025, ASSUMPTION_2025, CARRY_NEXT_YEAR_FLAG,
+                CARRY_NEXT_YEAR_THB, CARRY_NEXT_YEAR_USD, CARRY_NEXT_YEAR_DATE, CARRY_NEXT_YEAR_BY, REVIEW_STATUS, REVIEW_DATE, REVIEW_TIME_NO, REVISE00_PO_AMOUNT_THB, REVISE00_PO_AMOUNT_USD, REVISE01_PO_AMOUNT_DATE,
+                REVISE01_PO_AMOUNT_BY, REVISE01_PO_AMOUNT_THB, REVISE01_PO_AMOUNT_USD, REVISE02_PO_AMOUNT_DATE, REVISE02_PO_AMOUNT_BY, REVISE02_PO_AMOUNT_THB, REVISE02_PO_AMOUNT_USD, REVISE03_PO_AMOUNT_DATE,
+                REVISE03_PO_AMOUNT_BY, REVISE03_PO_AMOUNT_THB, REVISE03_PO_AMOUNT_USD, REVISE04_PO_AMOUNT_DATE, REVISE04_PO_AMOUNT_BY, REVISE04_PO_AMOUNT_THB, REVISE04_PO_AMOUNT_USD, REVISE05_PO_AMOUNT_DATE,
+                REVISE05_PO_AMOUNT_BY, REVISE05_PO_AMOUNT_THB, REVISE05_PO_AMOUNT_USD, BUDGET_CATEGORY, PO_VALUE_UNIT, PO_VALUE_AMOUNT_THB, PO_VALUE_AMOUNT_USD, BUSINESS_OWNER, BUSINESS_OBJECTIVE_OLD, BUSINESS_STRATEGIC_OLD,
+                CREATED, CREATED_BY, MODIFIED, MODIFIED_BY, ID, ITEM_TYPE, Path, NVL(HARDWARE_TOTAL, 0) HARDWARE_TOTAL, NVL(SOFTWARE_LICENSE_TOTAL, 0) SOFTWARE_LICENSE_TOTAL, NVL(SOFTWARE_DEV_TURNKEY_TOTAL, 0) SOFTWARE_DEV_TURNKEY_TOTAL, NVL(SOFTWARE_DEV_DBP_TOTAL, 0) SOFTWARE_DEV_DBP_TOTAL, NVL(SOFTWARE_DEV_AUTOMATE_TOTAL, 0) SOFTWARE_DEV_AUTOMATE_TOTAL,
+                NVL(EXTERNAL_OUTSOURCING_TOTAL, 0) EXTERNAL_OUTSOURCING_TOTAL, NVL(TOTAL_HW_SW_DBP_TURNKEY_TOTAL, 0) TOTAL_HW_SW_DBP_TURNKEY_TOTAL, NVL(OUTSOURCE_TOTAL_TOTAL, 0) OUTSOURCE_TOTAL_TOTAL, NVL(OUTSOURCE_PM_SI_TOTAL, 0) OUTSOURCE_PM_SI_TOTAL, NVL(OUTSOURCE_SA_TOTAL, 0) OUTSOURCE_SA_TOTAL, NVL(OUTSOURCE_PA_TOTAL, 0) OUTSOURCE_PA_TOTAL, NVL(OUTSOURCE_TESTER_TOTAL, 0) OUTSOURCE_TESTER_TOTAL, NVL(OUTSOURCE_TS_TOTAL, 0) OUTSOURCE_TS_TOTAL, NVL(OUTSOURCE_TC_TOTAL, 0) OUTSOURCE_TC_TOTAL
+            from plan_Budget_Capex
+            where budget_year = '${budgetYear}' and date_time = to_date('${dateTime}', 'YYYY-MM-DD')
+            ${contactPointDepartment === 'ALL' ? '' : `and CONTACT_POINT_DEPARTMENT ${contactPointDepartment === 'NULL' ? 'IS NULL' : `= '${contactPointDepartment}'`}`}
+        )
+        SELECT 
+            null,
+            'TOTAL FOR' || REPLACE(SUBSTR(investment_Level_4, Instr(investment_Level_4, ' ')), '  ',' ') lvl_name, null, null,null,null,null,null,null,null,null,null,null,
+            SUM(BUDGET_AMOUNT_USD) BUDGET_AMOUNT_USD, SUM(BUDGET_AMOUNT_THB) BUDGET_AMOUNT_THB, SUM(EQUIVALENT_TO_THB) EQUIVALENT_TO_THB, SUM(EQUIVALENT_TO_THB) / 34.78 / 1000000 AS EQUIVALENT_TO_USD, null,null,
+            SUM(hardware_total) hardware_total, SUM(software_license_total) software_license_total, SUM(software_dev_turnkey_total) software_dev_turnkey_total, SUM(software_dev_dbp_total) software_dev_dbp_total, 
+            SUM(software_dev_automate_total) software_dev_automate_total, SUM(external_outsourcing_total) external_outsourcing_total, SUM(outsource_total_total) outsource_total_total,SUM(outsource_pm_si_total) outsource_pm_si_total, SUM(outsource_sa_total) outsource_sa_total, SUM(outsource_pa_total) outsource_pa_total, SUM(outsource_tester_total) outsource_tester_total, SUM(outsource_ts_total) outsource_ts_total, SUM(outsource_tc_total) outsource_tc_total, null,SUM(plan_use_jan) plan_use_jan,SUM(plan_use_feb) plan_use_feb,SUM(plan_use_mar) plan_use_mar,SUM(plan_use_apr) plan_use_apr,SUM(plan_use_may) plan_use_may,SUM(plan_use_jun) plan_use_jun,SUM(plan_use_jul) plan_use_jul,SUM(plan_use_aug) plan_use_aug,SUM(plan_use_sep) plan_use_sep,SUM(plan_use_oct) plan_use_oct,SUM(plan_use_nov) plan_use_nov,SUM(plan_use_dec) plan_use_dec,SUM(plan_use_total) plan_use_total, null, SUM(forecast_inv_cur_jan) forecast_inv_cur_jan, SUM(forecast_inv_cur_feb) forecast_inv_cur_feb, SUM(forecast_inv_cur_mar) forecast_inv_cur_mar, SUM(forecast_inv_cur_apr) forecast_inv_cur_apr, SUM(forecast_inv_cur_may) forecast_inv_cur_may, SUM(forecast_inv_cur_jun) forecast_inv_cur_jun, SUM(forecast_inv_cur_jul) forecast_inv_cur_jul, SUM(forecast_inv_cur_aug) forecast_inv_cur_aug, SUM(forecast_inv_cur_sep) forecast_inv_cur_sep, SUM(forecast_inv_cur_oct) forecast_inv_cur_oct, SUM(forecast_inv_cur_nov) forecast_inv_cur_nov, SUM(forecast_inv_cur_dec) forecast_inv_cur_dec, SUM(forecast_inv_cur_total) forecast_inv_cur_total, null, SUM(forecast_inv_next_jan) forecast_inv_next_jan, SUM(forecast_inv_next_feb) forecast_inv_next_feb, SUM(forecast_inv_next_mar) forecast_inv_next_mar, SUM(forecast_inv_next_apr) forecast_inv_next_apr, SUM(forecast_inv_next_may) forecast_inv_next_may, SUM(forecast_inv_next_jun) forecast_inv_next_jun, SUM(forecast_inv_next_jul) forecast_inv_next_jul, SUM(forecast_inv_next_aug) forecast_inv_next_aug, SUM(forecast_inv_next_sep) forecast_inv_next_sep, SUM(forecast_inv_next_oct) forecast_inv_next_oct, SUM(forecast_inv_next_nov) forecast_inv_next_nov, SUM(forecast_inv_next_dec) forecast_inv_next_dec, SUM(forecast_inv_next_total) forecast_inv_next_total, (REPLACE(SUBSTR(investment_Level_4, 0, Instr(investment_Level_4, ' ')), '')) lvl_No
+        FROM main
+        WHERE investment_Level_1 IS NOT NULL AND investment_Level_2 IS NOT NULL AND investment_Level_3 IS NOT NULL AND investment_Level_4 IS NOT NULL
+        GROUP BY investment_Level_1, investment_Level_2, investment_Level_3, investment_Level_4
+        
+        UNION
+        
+        SELECT
+            null,
+            'TOTAL FOR' || REPLACE(SUBSTR(investment_Level_3, Instr(investment_Level_3, ' ')), '  ',' ') lvl_name, null, null,null,null,null,null,null,null,null,null,null,
+            SUM(BUDGET_AMOUNT_USD) BUDGET_AMOUNT_USD, SUM(BUDGET_AMOUNT_THB) BUDGET_AMOUNT_THB, SUM(EQUIVALENT_TO_THB) EQUIVALENT_TO_THB, SUM(EQUIVALENT_TO_THB) / 34.78 / 1000000 AS EQUIVALENT_TO_USD, null,null,
+            SUM(hardware_total) hardware_total, SUM(software_license_total) software_license_total, SUM(software_dev_turnkey_total) software_dev_turnkey_total, SUM(software_dev_dbp_total) software_dev_dbp_total, 
+            SUM(software_dev_automate_total) software_dev_automate_total, SUM(external_outsourcing_total) external_outsourcing_total, SUM(outsource_total_total) outsource_total_total, SUM(outsource_pm_si_total) outsource_pm_si_total, SUM(outsource_sa_total) outsource_sa_total, SUM(outsource_pa_total) outsource_pa_total, SUM(outsource_tester_total) outsource_tester_total, SUM(outsource_ts_total) outsource_ts_total, SUM(outsource_tc_total) outsource_tc_total, null,SUM(plan_use_jan) plan_use_jan,SUM(plan_use_feb) plan_use_feb,SUM(plan_use_mar) plan_use_mar,SUM(plan_use_apr) plan_use_apr,SUM(plan_use_may) plan_use_may,SUM(plan_use_jun) plan_use_jun,SUM(plan_use_jul) plan_use_jul,SUM(plan_use_aug) plan_use_aug,SUM(plan_use_sep) plan_use_sep,SUM(plan_use_oct) plan_use_oct,SUM(plan_use_nov) plan_use_nov,SUM(plan_use_dec) plan_use_dec,SUM(plan_use_total) plan_use_total, null, SUM(forecast_inv_cur_jan) forecast_inv_cur_jan, SUM(forecast_inv_cur_feb) forecast_inv_cur_feb, SUM(forecast_inv_cur_mar) forecast_inv_cur_mar, SUM(forecast_inv_cur_apr) forecast_inv_cur_apr, SUM(forecast_inv_cur_may) forecast_inv_cur_may, SUM(forecast_inv_cur_jun) forecast_inv_cur_jun, SUM(forecast_inv_cur_jul) forecast_inv_cur_jul, SUM(forecast_inv_cur_aug) forecast_inv_cur_aug, SUM(forecast_inv_cur_sep) forecast_inv_cur_sep, SUM(forecast_inv_cur_oct) forecast_inv_cur_oct, SUM(forecast_inv_cur_nov) forecast_inv_cur_nov, SUM(forecast_inv_cur_dec) forecast_inv_cur_dec, SUM(forecast_inv_cur_total) forecast_inv_cur_total, null, SUM(forecast_inv_next_jan) forecast_inv_next_jan, SUM(forecast_inv_next_feb) forecast_inv_next_feb, SUM(forecast_inv_next_mar) forecast_inv_next_mar, SUM(forecast_inv_next_apr) forecast_inv_next_apr, SUM(forecast_inv_next_may) forecast_inv_next_may, SUM(forecast_inv_next_jun) forecast_inv_next_jun, SUM(forecast_inv_next_jul) forecast_inv_next_jul, SUM(forecast_inv_next_aug) forecast_inv_next_aug, SUM(forecast_inv_next_sep) forecast_inv_next_sep, SUM(forecast_inv_next_oct) forecast_inv_next_oct, SUM(forecast_inv_next_nov) forecast_inv_next_nov, SUM(forecast_inv_next_dec) forecast_inv_next_dec, SUM(forecast_inv_next_total) forecast_inv_next_total, (REPLACE(SUBSTR(investment_Level_3, 0, Instr(investment_Level_3, ' ')), '')) lvl_No
+        FROM main
+        WHERE investment_Level_1 IS NOT NULL AND investment_Level_2 IS NOT NULL AND investment_Level_3 IS NOT NULL
+        GROUP BY investment_Level_1, investment_Level_2, investment_Level_3
+        
+        UNION
+        
+        SELECT
+            null,
+            'TOTAL FOR' || REPLACE(SUBSTR(investment_Level_2,Instr(investment_Level_2, ' ')), '  ',' ') lvl_name, null,null,null,null,null,null,null,null,null,null,null,
+            SUM(BUDGET_AMOUNT_USD) BUDGET_AMOUNT_USD,SUM(BUDGET_AMOUNT_THB) BUDGET_AMOUNT_THB,SUM(EQUIVALENT_TO_THB) EQUIVALENT_TO_THB,SUM(EQUIVALENT_TO_THB) / 34.78 / 1000000 AS EQUIVALENT_TO_USD,null,null,
+            SUM(hardware_total) hardware_total,SUM(software_license_total) software_license_total,SUM(software_dev_turnkey_total) software_dev_turnkey_total,SUM(software_dev_dbp_total) software_dev_dbp_total,SUM(software_dev_automate_total) software_dev_automate_total,SUM(external_outsourcing_total) external_outsourcing_total,SUM(outsource_total_total) outsource_total_total,SUM(outsource_pm_si_total) outsource_pm_si_total,SUM(outsource_sa_total) outsource_sa_total,SUM(outsource_pa_total) outsource_pa_total,SUM(outsource_tester_total) outsource_tester_total,SUM(outsource_ts_total) outsource_ts_total,SUM(outsource_tc_total) outsource_tc_total,null,SUM(plan_use_jan) plan_use_jan,SUM(plan_use_feb) plan_use_feb,SUM(plan_use_mar) plan_use_mar,SUM(plan_use_apr) plan_use_apr,SUM(plan_use_may) plan_use_may,SUM(plan_use_jun) plan_use_jun,SUM(plan_use_jul) plan_use_jul,SUM(plan_use_aug) plan_use_aug,SUM(plan_use_sep) plan_use_sep,SUM(plan_use_oct) plan_use_oct,SUM(plan_use_nov) plan_use_nov,SUM(plan_use_dec) plan_use_dec,SUM(plan_use_total) plan_use_total, null,SUM(forecast_inv_cur_jan) forecast_inv_cur_jan,SUM(forecast_inv_cur_feb) forecast_inv_cur_feb,SUM(forecast_inv_cur_mar) forecast_inv_cur_mar,SUM(forecast_inv_cur_apr) forecast_inv_cur_apr,SUM(forecast_inv_cur_may) forecast_inv_cur_may,SUM(forecast_inv_cur_jun) forecast_inv_cur_jun,SUM(forecast_inv_cur_jul) forecast_inv_cur_jul,SUM(forecast_inv_cur_aug) forecast_inv_cur_aug,SUM(forecast_inv_cur_sep) forecast_inv_cur_sep,SUM(forecast_inv_cur_oct) forecast_inv_cur_oct,SUM(forecast_inv_cur_nov) forecast_inv_cur_nov,SUM(forecast_inv_cur_dec) forecast_inv_cur_dec,SUM(forecast_inv_cur_total) forecast_inv_cur_total,null,SUM(forecast_inv_next_jan) forecast_inv_next_jan,SUM(forecast_inv_next_feb) forecast_inv_next_feb,SUM(forecast_inv_next_mar) forecast_inv_next_mar,SUM(forecast_inv_next_apr) forecast_inv_next_apr,SUM(forecast_inv_next_may) forecast_inv_next_may,SUM(forecast_inv_next_jun) forecast_inv_next_jun,SUM(forecast_inv_next_jul) forecast_inv_next_jul,SUM(forecast_inv_next_aug) forecast_inv_next_aug,SUM(forecast_inv_next_sep) forecast_inv_next_sep,SUM(forecast_inv_next_oct) forecast_inv_next_oct,SUM(forecast_inv_next_nov) forecast_inv_next_nov,SUM(forecast_inv_next_dec) forecast_inv_next_dec,SUM(forecast_inv_next_total) forecast_inv_next_total, (REPLACE(SUBSTR(investment_Level_2, 0, Instr(investment_Level_2, ' ')), '')) lvl_No
+        FROM main
+        WHERE investment_Level_1 IS NOT NULL AND investment_Level_2 IS NOT NULL
+        GROUP BY investment_Level_1, investment_Level_2
+        
+        UNION
+        
+        SELECT
+            null,
+            'TOTAL FOR' || REPLACE(SUBSTR(investment_Level_1,Instr(investment_Level_1, ' ')), '  ',' ') lvl_name, null, null,null,null,null,null,null,null,null,null,null,
+            SUM(BUDGET_AMOUNT_USD) BUDGET_AMOUNT_USD, SUM(BUDGET_AMOUNT_THB) BUDGET_AMOUNT_THB, SUM(EQUIVALENT_TO_THB) EQUIVALENT_TO_THB, SUM(EQUIVALENT_TO_THB) / 34.78 / 1000000 AS EQUIVALENT_TO_USD, null,null,
+            SUM(hardware_total) hardware_total, SUM(software_license_total) software_license_total, SUM(software_dev_turnkey_total) software_dev_turnkey_total, SUM(software_dev_dbp_total) software_dev_dbp_total, SUM(software_dev_automate_total) software_dev_automate_total, SUM(external_outsourcing_total) external_outsourcing_total, SUM(outsource_total_total) outsource_total_total, SUM(outsource_pm_si_total) outsource_pm_si_total, SUM(outsource_sa_total) outsource_sa_total, SUM(outsource_pa_total) outsource_pa_total, SUM(outsource_tester_total) outsource_tester_total, SUM(outsource_ts_total) outsource_ts_total, SUM(outsource_tc_total) outsource_tc_total, null,SUM(plan_use_jan) plan_use_jan,SUM(plan_use_feb) plan_use_feb,SUM(plan_use_mar) plan_use_mar,SUM(plan_use_apr) plan_use_apr,SUM(plan_use_may) plan_use_may,SUM(plan_use_jun) plan_use_jun,SUM(plan_use_jul) plan_use_jul,SUM(plan_use_aug) plan_use_aug,SUM(plan_use_sep) plan_use_sep,SUM(plan_use_oct) plan_use_oct,SUM(plan_use_nov) plan_use_nov,SUM(plan_use_dec) plan_use_dec,SUM(plan_use_total) plan_use_total, null, SUM(forecast_inv_cur_jan) forecast_inv_cur_jan, SUM(forecast_inv_cur_feb) forecast_inv_cur_feb, SUM(forecast_inv_cur_mar) forecast_inv_cur_mar, SUM(forecast_inv_cur_apr) forecast_inv_cur_apr, SUM(forecast_inv_cur_may) forecast_inv_cur_may, SUM(forecast_inv_cur_jun) forecast_inv_cur_jun, SUM(forecast_inv_cur_jul) forecast_inv_cur_jul, SUM(forecast_inv_cur_aug) forecast_inv_cur_aug, SUM(forecast_inv_cur_sep) forecast_inv_cur_sep, SUM(forecast_inv_cur_oct) forecast_inv_cur_oct, SUM(forecast_inv_cur_nov) forecast_inv_cur_nov, SUM(forecast_inv_cur_dec) forecast_inv_cur_dec, SUM(forecast_inv_cur_total) forecast_inv_cur_total, null, SUM(forecast_inv_next_jan) forecast_inv_next_jan, SUM(forecast_inv_next_feb) forecast_inv_next_feb, SUM(forecast_inv_next_mar) forecast_inv_next_mar, SUM(forecast_inv_next_apr) forecast_inv_next_apr, SUM(forecast_inv_next_may) forecast_inv_next_may, SUM(forecast_inv_next_jun) forecast_inv_next_jun, SUM(forecast_inv_next_jul) forecast_inv_next_jul, SUM(forecast_inv_next_aug) forecast_inv_next_aug, SUM(forecast_inv_next_sep) forecast_inv_next_sep, SUM(forecast_inv_next_oct) forecast_inv_next_oct, SUM(forecast_inv_next_nov) forecast_inv_next_nov, SUM(forecast_inv_next_dec) forecast_inv_next_dec, SUM(forecast_inv_next_total) forecast_inv_next_total, (REPLACE(SUBSTR(investment_Level_1, 0, Instr(investment_Level_1, ' ')), '')) lvl_No
+        FROM main
+        WHERE investment_Level_1 IS NOT NULL
+        GROUP BY investment_Level_1
+        
+        UNION
+        
+        SELECT
+            null, 'GRAND TOTAL FOR CAPEX INVESTMENT Y${budgetYear}' lvl_name, null, null,null,null,null,null,null,null,null,null,null, SUM(BUDGET_AMOUNT_USD) BUDGET_AMOUNT_USD, SUM(BUDGET_AMOUNT_THB) BUDGET_AMOUNT_THB,
+            SUM(EQUIVALENT_TO_THB) EQUIVALENT_TO_THB, SUM(EQUIVALENT_TO_THB) / 34.78 / 1000000 AS EQUIVALENT_TO_USD, null,null, SUM(hardware_total) hardware_total, SUM(software_license_total) software_license_total, SUM(software_dev_turnkey_total) software_dev_turnkey_total, SUM(software_dev_dbp_total) software_dev_dbp_total, SUM(software_dev_automate_total) software_dev_automate_total, SUM(external_outsourcing_total) external_outsourcing_total, SUM(outsource_total_total) outsource_total_total, SUM(outsource_pm_si_total) outsource_pm_si_total, SUM(outsource_sa_total) outsource_sa_total, SUM(outsource_pa_total) outsource_pa_total, SUM(outsource_tester_total) outsource_tester_total, SUM(outsource_ts_total) outsource_ts_total, SUM(outsource_tc_total) outsource_tc_total, null,SUM(plan_use_jan) plan_use_jan,SUM(plan_use_feb) plan_use_feb,SUM(plan_use_mar) plan_use_mar,SUM(plan_use_apr) plan_use_apr,SUM(plan_use_may) plan_use_may,SUM(plan_use_jun) plan_use_jun,SUM(plan_use_jul) plan_use_jul,SUM(plan_use_aug) plan_use_aug,SUM(plan_use_sep) plan_use_sep,SUM(plan_use_oct) plan_use_oct,SUM(plan_use_nov) plan_use_nov,SUM(plan_use_dec) plan_use_dec,SUM(plan_use_total) plan_use_total, null, SUM(forecast_inv_cur_jan) forecast_inv_cur_jan, SUM(forecast_inv_cur_feb) forecast_inv_cur_feb, SUM(forecast_inv_cur_mar) forecast_inv_cur_mar, SUM(forecast_inv_cur_apr) forecast_inv_cur_apr, SUM(forecast_inv_cur_may) forecast_inv_cur_may, SUM(forecast_inv_cur_jun) forecast_inv_cur_jun, SUM(forecast_inv_cur_jul) forecast_inv_cur_jul, SUM(forecast_inv_cur_aug) forecast_inv_cur_aug, SUM(forecast_inv_cur_sep) forecast_inv_cur_sep, SUM(forecast_inv_cur_oct) forecast_inv_cur_oct, SUM(forecast_inv_cur_nov) forecast_inv_cur_nov, SUM(forecast_inv_cur_dec) forecast_inv_cur_dec, SUM(forecast_inv_cur_total) forecast_inv_cur_total, null, SUM(forecast_inv_next_jan) forecast_inv_next_jan, SUM(forecast_inv_next_feb) forecast_inv_next_feb, SUM(forecast_inv_next_mar) forecast_inv_next_mar, SUM(forecast_inv_next_apr) forecast_inv_next_apr, SUM(forecast_inv_next_may) forecast_inv_next_may, SUM(forecast_inv_next_jun) forecast_inv_next_jun, SUM(forecast_inv_next_jul) forecast_inv_next_jul, SUM(forecast_inv_next_aug) forecast_inv_next_aug, SUM(forecast_inv_next_sep) forecast_inv_next_sep, SUM(forecast_inv_next_oct) forecast_inv_next_oct, SUM(forecast_inv_next_nov) forecast_inv_next_nov, SUM(forecast_inv_next_dec) forecast_inv_next_dec, SUM(forecast_inv_next_total) forecast_inv_next_total, 'Grand' lvl_No
+        FROM main
     `)
 
     if (!rows.length) {
@@ -170,18 +266,10 @@ async function generateMaster(budgetYear, dateTime, contactPointDepartment) {
     }
     let pos = 0
     let nowLvl
-    let nowLvlTotal = 0
-    let countLvl = {
-        lvl1: 0,
-        lvl2: 0,
-        lvl3: 0,
-        lvl4: 0,
-        g: 0,
-    }
-    let stack1 = 0
-    let stack2 = 0
-    let stack3 = 0
     let lastSubRow = false
+    let nullRow = {
+        null1: null, null2: null, null3: null, null4: null, null5: null, null6: null, null7: null, null8: null, null9: null, null10: null, null11: '', null12: '', null13: '', null14: '', null15: '', null16: '', null17: '', null18: '', null19: '', null20: '', null21: '', null22: '', null23: '', null24: '', null25: '', null26: '', null27: '', null28: '', null29: '', null30: '', null31: '', null32: '', null33: '', null34: '', null35: '', null36: '', null37: '', null38: '', null39: '', null40: '', null41: '', null42: '', null43: '', null44: '', null45: '', null46: '', null47: '', null48: '', null49: '', null50: '', null51: '', null52: '', null53: '', null54: '', null55: '', null56: '', null57: '', null58: '', null59: '', null60: '', null61: '', null62: '', null63: '', null64: '', null65: '', null66: '', null67: '', null68: '', null69: '', null70: '', null71: '', null72: '', null73: '', null74: '', null75: ''
+    }
     for (let i = 0; i < rows.length; i++) {
         const item = rows[i];
         // Header
@@ -194,28 +282,24 @@ async function generateMaster(budgetYear, dateTime, contactPointDepartment) {
             level[0] = item.lvl1
             arranged.push({lvl1: item.lvl1})
             levelStyle.lvl1.push(pos)
-            nowLvlTotal = 1
             pos++
         }
         if ((!level[1] || (level[1] && level[1] !== item.lvl2)) && item.lvl2) {
             level[1] = item.lvl2
-            arranged.push({lvl2No: item.lvl2No, lvl2Name: item.lvl2Name})
+            arranged.push({lvl2No: item.lvl2No, lvl2Name: item.lvl2Name, ...nullRow})
             levelStyle.lvl2.push(pos)
-            nowLvlTotal = 2
             pos++
         }
         if ((!level[2] || (level[2] && level[2] !== item.lvl3)) && item.lvl3) {
             level[2] = item.lvl3
-            arranged.push({lvl3No: item.lvl3No, lvl3Name: item.lvl3Name})
+            arranged.push({lvl3No: item.lvl3No, lvl3Name: item.lvl3Name, ...nullRow})
             levelStyle.lvl3.push(pos)
-            nowLvlTotal = 3
             pos++
         }
         if ((!level[3] || (level[3] && level[3] !== item.lvl4)) && item.lvl4) {
             level[3] = item.lvl4
-            arranged.push({lvl4No: item.lvl4No, lvl4Name: item.lvl4Name})
+            arranged.push({lvl4No: item.lvl4No, lvl4Name: item.lvl4Name, ...nullRow})
             levelStyle.lvl4.push(pos)
-            nowLvlTotal = 4
             pos++
         }
 
@@ -226,20 +310,6 @@ async function generateMaster(budgetYear, dateTime, contactPointDepartment) {
         arranged.push(item)
         levelStyle.lvl5.push(pos)
         lastSubRow = true
-        countLvl.lvl1 += 1
-        stack1 += 1
-        countLvl.g += 1
-        if (nowLvlTotal === 2) {
-            countLvl.lvl2 += 1
-        }
-        if (nowLvlTotal === 3) {
-            countLvl.lvl3 += 1
-            stack2 += 1
-        }
-        if (nowLvlTotal === 4) {
-            countLvl.lvl4 += 1
-            stack3 += 1
-        }
         pos++
 
         // Total
@@ -253,122 +323,139 @@ async function generateMaster(budgetYear, dateTime, contactPointDepartment) {
         if (tmpItem) {
             if ((!level[3] || (level[3] && level[3] !== tmpItem.lvl4)) && item.lvl4) {
                 if (lastSubRow) {
-                    arranged.push({mock: null})
+                    arranged.push(nullRow)
                     pos++
                 }
-                arranged.push({mock: null, lvl4: 'TOTAL FOR ' + item.lvl4Name + ' ' + countLvl.lvl4})
-                countLvl.lvl4 = 0
+                let totalRow = totalRows.find(e => e.lvlNo.trim() === item.lvl4No)
+                if (!totalRow) process.exit(0)
+                arranged.push(totalRow)
                 levelStyle.lvl4Total.push(pos)
                 pos++
-                arranged.push({mock: null})
+                arranged.push(nullRow)
                 pos++
                 lastSubRow = false
             }
             if ((!level[2] || (level[2] && level[2] !== tmpItem.lvl3)) && item.lvl3) {
                 if (lastSubRow) {
-                    arranged.push({mock: null})
+                    arranged.push(nullRow)
                     pos++
                 }
-                arranged.push({mock: null, lvl3: 'TOTAL FOR ' + item.lvl3Name + ' ' + (countLvl.lvl3 === 0 ? stack3 : countLvl.lvl3)})
-                countLvl.lvl3 = 0
-                stack3 = 0
+                let totalRow = totalRows.find(e => e.lvlNo.trim() === item.lvl3No)
+                if (!totalRow) process.exit(0)
+                arranged.push(totalRow)
                 levelStyle.lvl3Total.push(pos)
                 pos++
-                arranged.push({mock: null})
+                arranged.push(nullRow)
                 pos++
                 lastSubRow = false
             }
             if ((!level[1] || (level[1] && level[1] !== tmpItem.lvl2)) && item.lvl2) {
                 if (lastSubRow) {
-                    arranged.push({mock: null})
+                    arranged.push(nullRow)
                     pos++
                 }
-                arranged.push({mock: null, lvl2: 'TOTAL FOR ' + item.lvl2Name + ' ' + (countLvl.lvl2 === 0 ? stack2 : countLvl.lvl2)})
-                countLvl.lvl2 = 0
-                stack2 = 0
+                let totalRow = totalRows.find(e => e.lvlNo.trim() === item.lvl2No)
+                if (!totalRow) process.exit(0)
+                arranged.push(totalRow)
                 levelStyle.lvl2Total.push(pos)
                 pos++
-                arranged.push({mock: null})
+                arranged.push(nullRow)
                 pos++
                 lastSubRow = false
             }
             if ((!level[0] || (level[0] && level[0] !== tmpItem.lvl1)) && item.lvl1) {
                 if (lastSubRow) {
-                    arranged.push({mock: null})
+                    arranged.push(nullRow)
                     pos++
                 }
-                arranged.push({mock: null, lvl1: 'TOTAL FOR ' + item.lvl1Name+ ' ' + countLvl.lvl1})
-                countLvl.lvl1 = 0
-                stack1 = 0
+                let totalRow = totalRows.find(e => e.lvlNo.trim() === item.lvl1No)
+                if (!totalRow) process.exit(0)
+                arranged.push(totalRow)
                 levelStyle.lvl1Total.push(pos)
                 pos++
-                arranged.push({mock: null})
+                arranged.push(nullRow)
                 pos++
                 lastSubRow = false
             }
         } else {
             // last item
             nowLvl = item.lvl4 ? 4 : item.lvl3 ? 3 : item.lvl2 ? 2 : 1
-            arranged.push({mock: null})
+            arranged.push(nullRow)
             pos++
-            arranged.push({mock: null, lvlx: 'TOTAL FOR ' + item[`lvl${nowLvl}Name`] + ' ' + countLvl[`lvl${nowLvl}`]})
+            let totalRow = totalRows.find(e => e.lvlNo.trim() === item[`lvl${nowLvl}No`])
+            if (!totalRow) process.exit(0)
+            arranged.push(totalRow)
             levelStyle[`lvl${nowLvl}Total`].push(pos)
             pos++
-            arranged.push({mock: null})
+            arranged.push(nullRow)
             pos++
             
             if (nowLvl === 4) {
                 // ถ้า 4 สรุป 3,2,1
-                arranged.push({mock: null, lvlx: 'TOTAL FOR ' + item[`lvl${nowLvl - 1}Name`] + ' ' + stack3})
+                let totalRow3 = totalRows.find(e => e.lvlNo.trim() === item[`lvl${nowLvl-1}No`])
+                if (!totalRow3) process.exit(0)
+                arranged.push(totalRow3)
                 levelStyle[`lvl${nowLvl - 1}Total`].push(pos)
                 pos++
-                arranged.push({mock: null})
+                arranged.push(nullRow)
                 pos++
 
-                arranged.push({mock: null, lvlx: 'TOTAL FOR ' + item[`lvl${nowLvl - 2}Name`] + ' ' + stack2})
+                let totalRow2 = totalRows.find(e => e.lvlNo.trim() === item[`lvl${nowLvl-2}No`])
+                if (!totalRow2) process.exit(0)
+                arranged.push(totalRow2)
                 levelStyle[`lvl${nowLvl - 2}Total`].push(pos)
                 pos++
-                arranged.push({mock: null})
+                arranged.push(nullRow)
                 pos++
 
-                arranged.push({mock: null, lvlx: 'TOTAL FOR ' + item[`lvl${nowLvl - 3}Name`] + ' ' + stack1})
+                let totalRow1 = totalRows.find(e => e.lvlNo.trim() === item[`lvl${nowLvl-3}No`])
+                if (!totalRow1) process.exit(0)
+                arranged.push(totalRow1)
                 levelStyle[`lvl${nowLvl - 3}Total`].push(pos)
                 pos++
-                arranged.push({mock: null})
+                arranged.push(nullRow)
                 pos++
             }
             if (nowLvl === 3) {
                 // ถ้า 3 สรุป 2, 1
-                arranged.push({mock: null, lvlx: 'TOTAL FOR ' + item[`lvl${nowLvl - 1}Name`] + ' ' + stack2})
+                let totalRow2 = totalRows.find(e => e.lvlNo.trim() === item[`lvl${nowLvl-1}No`])
+                if (!totalRow2) process.exit(0)
+                arranged.push(totalRow2)
                 levelStyle[`lvl${nowLvl - 1}Total`].push(pos)
                 pos++
-                arranged.push({mock: null})
+                arranged.push(nullRow)
                 pos++
 
-                arranged.push({mock: null, lvlx: 'TOTAL FOR ' + item[`lvl${nowLvl - 2}Name`] + ' ' + stack1})
+                let totalRow1 = totalRows.find(e => e.lvlNo.trim() === item[`lvl${nowLvl-2}No`])
+                if (!totalRow1) process.exit(0)
+                arranged.push(totalRow1)
                 levelStyle[`lvl${nowLvl - 2}Total`].push(pos)
                 pos++
-                arranged.push({mock: null})
+                arranged.push(nullRow)
                 pos++
             }
             if (nowLvl === 2) {
                 // ถ้า 2 สรุป 1
-                arranged.push({mock: null, lvlx: 'TOTAL FOR ' + item[`lvl${nowLvl - 1}Name`] + ' ' + stack1})
+                let totalRow1 = totalRows.find(e => e.lvlNo.trim() === item[`lvl${nowLvl-1}No`])
+                if (!totalRow1) process.exit(0)
+                arranged.push(totalRow1)
                 levelStyle[`lvl${nowLvl - 1}Total`].push(pos)
                 pos++
-                arranged.push({mock: null})
+                arranged.push(nullRow)
                 pos++
             }
             
         }
     }
+
     // Set Grand total
-    arranged.push({mock: null, lvlx: `GRAND TOTAL FOR CAPEX INVESTMENT Y${budgetYear} ` + countLvl.g })
+    let totalRow = totalRows.find(e => e.lvlNo.trim() === 'Grand')
+    if (!totalRow) process.exit(0)
+    arranged.push(totalRow)
     levelStyle[`lvlGTotal`].push(pos)
 
     // Set row data
     r = 4
-    let moneyColumn = [13,14,15,16,33,34,35,36,37,38,39,40,41,42,43,44,45,47,48,49,50,51,52,53,54,55,56,57,58,59,61,62,63,64,65,66,67,68,69,70,71,72,73]
     for (let i = 0; i < arranged.length; i++) {
         const rawData = arranged[i];
         let rowArray = []
@@ -387,10 +474,6 @@ async function generateMaster(budgetYear, dateTime, contactPointDepartment) {
                     } else {
                         rowArray.push(rawData[key]);
                     }
-                } else if (rawData[key] && moneyColumn.includes(columnCount)) {
-                    // let strNumber = rawData[key].toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",");
-                    // rowArray.push(strNumber)
-                    rowArray.push(rawData[key])
                 } else {
                     rowArray.push(rawData[key])
                 }
@@ -403,6 +486,21 @@ async function generateMaster(budgetYear, dateTime, contactPointDepartment) {
     }
 
     // Set style
+    ws.eachRow({ includeEmpty: true },function (row, rowNumber) {
+        if (rowNumber > 3) {
+            row.eachCell(function(cell, colNumber) {
+                if ([16, 17].includes(colNumber)) {
+                    cell.fill = {
+                        type: 'pattern',
+                        pattern: 'solid',
+                        fgColor: { argb: 'D9D9D9' },
+                    }
+                }
+            })
+        }
+    })
+
+    let moneyColumn = [13,14,15,16,19,20,21,22,23,24,25,26,27,28,29,30,33,34,35,36,37,38,39,40,41,42,43,44,45,47,48,49,50,51,52,53,54,55,56,57,58,59,61,62,63,64,65,66,67,68,69,70,71,72,73]
     ws.eachRow((row, rowNumber) => {
         if (levelStyle.lvl1.includes(rowNumber - 4)) {
             row.font = {
@@ -503,34 +601,17 @@ async function generateMaster(budgetYear, dateTime, contactPointDepartment) {
                     bold: false,
                     size: 8,
                 };
-                row.eachCell(function(cell, colNumber) {
-                    if (moneyColumn.includes(colNumber - 1)) {
-                        ws.getCell(cell.address).alignment = { horizontal: 'right' };
-                        cell.numFmt = '#,##0.00;[Red]-#,##0.00'
-                    } else {
-                        row.alignment = {
-                            horizontal: 'left'
-                        }
-                    }
-                })
             }
         }
+        if (rowNumber > 3) {
+            row.eachCell(function(cell, colNumber) {
+                if (moneyColumn.includes(colNumber - 1)) {
+                    ws.getCell(cell.address).alignment = { horizontal: 'right' };
+                    cell.numFmt = '#,##0.00;[Red]-#,##0.00'
+                }
+            })
+        }
     });
-
-    // ws.eachRow((row, rowNumber) => {
-    //     if (rowNumber > 3) {
-    //         row.eachCell({ includeEmpty: true }, function(cell, colNumber) {
-    //             if ([16,17].includes(colNumber)) {
-    //                 cell.fill = {
-    //                     type: 'pattern',
-    //                     pattern: 'solid',
-    //                     fgColor: { argb: 'FFFF00' },
-    //                 }
-    //             }
-    //             console.log('Cell ' + colNumber + ' = ' + cell.value);
-    //         });
-    //     }
-    // })
     
     // write file
     let deapartmentOwner = contactPointDepartment.replaceAll(/[<>:"\/\\|?*]+/g, '_')
