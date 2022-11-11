@@ -1,6 +1,9 @@
 const Excel = require('exceljs')
 const moment = require('dayjs');
 const chalk = require('chalk');
+const path = require('path')
+const mkdirp = require('mkdirp')
+
 
 // const util = require('./lib/util');
 const config = require('../config');
@@ -56,11 +59,10 @@ async function generateBudgetPlanCAPEX(budgetYear, dateTime, contactPointDepartm
         dateTime = moment(moment(dateTime).format('YYYYMMDD')).format('YYYY-MM-DD');
     }
 
-    // get data
-    console.log('Fetching data...')
+    // get team data
     let teamList = []
     if (contactPointDepartment === 'TEAM') {
-        teamList = await knex('planBudgetCapex').select(knex.raw(`distinct(contact_Point_Department)`)).then(item => item = item.map(e => e = e.contactPointDepartment))
+        teamList = await knex('planBudgetCapex').select(knex.raw(`distinct(nvl(contact_Point_Department, 'NULL')) contact_Point_Department`)).where('dateTime', knex.raw(`to_date('${dateTime}', 'YYYY-MM-DD')`)).where('budgetYear', budgetYear).then(item => item = item.map(e => e = e.contactPointDepartment))
         console.log('teamList', teamList)
     } else {
         teamList.push(contactPointDepartment)
@@ -89,16 +91,19 @@ async function generateBudgetPlanCAPEX(budgetYear, dateTime, contactPointDepartm
 }
 
 async function generateMaster(budgetYear, dateTime, contactPointDepartment) {
-    // import template for header
     console.log('');
     console.log('TEAM:', contactPointDepartment)
-    // console.log('Importing template...')
+
+    // import template for header
     let fileName = './src/generate-budget-plan/templates/TemplateCAPEX.xlsx'
     let wb = new Excel.Workbook();
     let ws
     await wb.xlsx.readFile(fileName).then(function() {
         ws = wb.getWorksheet('Sheet1');
     });
+
+    
+    // get data
     let rows = await knex.raw(`
     with main as (
         select
@@ -117,9 +122,10 @@ async function generateMaster(budgetYear, dateTime, contactPointDepartment) {
     from main m
     )
     select 
-        null mock,null mock,budget_name,busines_function,business_group,business_owner_name,sub_project_product,project_priority,budget_company,cost_center,contact_point_budget_own_name,contact_point_department,contact_point_mobile,budget_amount_usd,budget_amount_thb,equivalent_to_thb,equivalent_to_usd,assumption_budget_calculation,project_description,hardware_total,software_license_total,software_dev_turnkey_total,software_dev_dbp_total,software_dev_automate_total,external_outsourcing_total,outsource_total_total,outsource_pm_si_total,outsource_sa_total,outsource_pa_total,outsource_tester_total,outsource_ts_total,outsource_tc_total,null mock,plan_use_jan,plan_use_feb,plan_use_mar,plan_use_apr,plan_use_may,plan_use_jun,plan_use_jul,plan_use_aug,plan_use_sep,plan_use_oct,plan_use_nov,plan_use_dec,plan_use_total,null mock,forecast_inv_cur_jan,forecast_inv_cur_feb,forecast_inv_cur_mar,forecast_inv_cur_apr,forecast_inv_cur_may,forecast_inv_cur_jun,forecast_inv_cur_jul,forecast_inv_cur_aug,forecast_inv_cur_sep,forecast_inv_cur_oct,forecast_inv_cur_nov,forecast_inv_cur_dec,forecast_inv_cur_total,null mock,forecast_inv_next_jan,forecast_inv_next_feb,forecast_inv_next_mar,forecast_inv_next_apr,forecast_inv_next_may,forecast_inv_next_jun,forecast_inv_next_jul,forecast_inv_next_aug,forecast_inv_next_sep,forecast_inv_next_oct,forecast_inv_next_nov,forecast_inv_next_dec,forecast_inv_next_total,CASE WHEN investment_Level_1 IS NOT NULL THEN investment_Level_1 ELSE '6. Other' END lvl1,CASE WHEN investment_Level_2 IS NOT NULL THEN investment_Level_2 ELSE '6. Other' END lvl2,investment_Level_3 lvl3,investment_Level_4 lvl4, date_time
+        null mock,null mock,budget_name,busines_function,business_group,business_owner_name,sub_project_product,project_priority,budget_company,cost_center,contact_point_budget_own_name,contact_point_department,contact_point_mobile,budget_amount_usd,budget_amount_thb,equivalent_to_thb,equivalent_to_usd,assumption_budget_calculation,project_description,hardware_total,software_license_total,software_dev_turnkey_total,software_dev_dbp_total,software_dev_automate_total,external_outsourcing_total,outsource_total_total,outsource_pm_si_total,outsource_sa_total,outsource_pa_total,outsource_tester_total,outsource_ts_total,outsource_tc_total,null mock,plan_use_jan,plan_use_feb,plan_use_mar,plan_use_apr,plan_use_may,plan_use_jun,plan_use_jul,plan_use_aug,plan_use_sep,plan_use_oct,plan_use_nov,plan_use_dec,plan_use_total,null mock,forecast_inv_cur_jan,forecast_inv_cur_feb,forecast_inv_cur_mar,forecast_inv_cur_apr,forecast_inv_cur_may,forecast_inv_cur_jun,forecast_inv_cur_jul,forecast_inv_cur_aug,forecast_inv_cur_sep,forecast_inv_cur_oct,forecast_inv_cur_nov,forecast_inv_cur_dec,forecast_inv_cur_total,null mock,forecast_inv_next_jan,forecast_inv_next_feb,forecast_inv_next_mar,forecast_inv_next_apr,forecast_inv_next_may,forecast_inv_next_jun,forecast_inv_next_jul,forecast_inv_next_aug,forecast_inv_next_sep,forecast_inv_next_oct,forecast_inv_next_nov,forecast_inv_next_dec,forecast_inv_next_total,CASE WHEN investment_Level_1 IS NOT NULL THEN investment_Level_1 ELSE '99. NULL' END lvl1,CASE WHEN investment_Level_2 IS NOT NULL THEN investment_Level_2 ELSE '99. NULL' END lvl2,investment_Level_3 lvl3,investment_Level_4 lvl4, date_time
     from gen
-    where budget_year = '${budgetYear}' and date_time = to_date('${dateTime}', 'YYYY-MM-DD') ${contactPointDepartment === 'ALL' ? '' : `and CONTACT_POINT_DEPARTMENT = '${contactPointDepartment}'`}
+    where budget_year = '${budgetYear}' and date_time = to_date('${dateTime}', 'YYYY-MM-DD')
+            ${contactPointDepartment === 'ALL' ? '' : `and CONTACT_POINT_DEPARTMENT ${contactPointDepartment === 'NULL' ? 'IS NULL' : `= '${contactPointDepartment}'`}`}
     order by neworder1, neworder2, neworder3, neworder4
     `)
 
@@ -179,7 +185,12 @@ async function generateMaster(budgetYear, dateTime, contactPointDepartment) {
     for (let i = 0; i < rows.length; i++) {
         const item = rows[i];
         // Header
-        if ((!level[0] || (level[0] && level[0] !== item.lvl1)) && item.lvl1) {
+        // Set ครั้งแรก และ ทุกครั้งที่เปลี่ยน levelx ใหม่ โดยที่ data query จะต้องมี lvlx นั้นๆ ด้วย ไม้งั้นมันจะเช็คกับ null
+        // == เมื่อตรงเงื่อนไข ==
+        // 1. จะนำ ค่าจาก data query ที่ lvlx มาเก็บไว้ เพื่อไว้ check ในครั้งหน้าว่ายังเป็น level เดิมอยู่หรือไหม
+        // 2. นำค่า Header ใส่ Excel
+        // 3. เก็บตำแหน่ง ว่าตำแหน่งนี้ใช้ style ไหน
+        if ((!level[0] || (level[0] && level[0] !== item.lvl1)) && item.lvl1) { 
             level[0] = item.lvl1
             arranged.push({lvl1: item.lvl1})
             levelStyle.lvl1.push(pos)
@@ -209,9 +220,12 @@ async function generateMaster(budgetYear, dateTime, contactPointDepartment) {
         }
 
         // Data
+        // 1. นำค่า data ใส่ Excel
+        // 2. เก็บตำแหน่ง ว่าตำแหน่งนี้ใช้ style ไหน
+        // 3. Set lastSubRow = true เพื่อให้รู้ว่าเป็นตัวสุดท้าย ถ้ามีการ สรุป Total ถ้ายังไม่สรุป ก็จะเป็น true เรื่อยๆไม่มีปัญหา
         arranged.push(item)
-        lastSubRow = true
         levelStyle.lvl5.push(pos)
+        lastSubRow = true
         countLvl.lvl1 += 1
         stack1 += 1
         countLvl.g += 1
@@ -229,7 +243,12 @@ async function generateMaster(budgetYear, dateTime, contactPointDepartment) {
         pos++
 
         // Total
-        // check next if over push total
+        // Check มีตัวต่อไปหรือไม่
+        // ถ้าไม่มี แสดงว่าเป็นตัวสุดท้ายแล้ว ให้สรุป total จนครบ เช่น ตอนนี้อยู่ lvl3 ก็ต้องสรุป 3, 2, 1
+        // ถ้ามี ก็ต้องเช็คว่าตัวต่อไปนั้นยังเป็น lvl เดิมหรือไม่
+        // // ถ้ายังเป็น lvl เดิมอยู่ให้ข้ามไป
+        // // ถ้าไม่ ให้ ลง total ของ lvl นั้นๆ เรียงจาก 4->3->2->1
+        // // set lastSubRow = false เพราะมันเป็นตัวสุดท้ายของชุดแล้ว
         let tmpItem = rows[i + 1]
         if (tmpItem) {
             if ((!level[3] || (level[3] && level[3] !== tmpItem.lvl4)) && item.lvl4) {
@@ -349,13 +368,32 @@ async function generateMaster(budgetYear, dateTime, contactPointDepartment) {
 
     // Set row data
     r = 4
+    let moneyColumn = [13,14,15,16,33,34,35,36,37,38,39,40,41,42,43,44,45,47,48,49,50,51,52,53,54,55,56,57,58,59,61,62,63,64,65,66,67,68,69,70,71,72,73]
     for (let i = 0; i < arranged.length; i++) {
         const rawData = arranged[i];
         let rowArray = []
         let columnCount = 0
         for (const key in rawData) {
             if (columnCount < 74) {
-                rowArray.push(rawData[key])
+                if (['contactPointMobile'].includes(key)) {
+                    if (rawData[key]) {
+                        let contactNumber = rawData[key].replaceAll(/(\-+|\s+|\_+)/g, '');
+                        if (Number(contactNumber) > 0) {
+                            let strContactNumber = contactNumber.substring(0, 3)+ '-' + contactNumber.substring(3, 6)+ '-' + contactNumber.substring(6, 10);
+                            rowArray.push(strContactNumber);
+                        } else {
+                            rowArray.push(rawData[key]);
+                        }
+                    } else {
+                        rowArray.push(rawData[key]);
+                    }
+                } else if (rawData[key] && moneyColumn.includes(columnCount)) {
+                    // let strNumber = rawData[key].toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",");
+                    // rowArray.push(strNumber)
+                    rowArray.push(rawData[key])
+                } else {
+                    rowArray.push(rawData[key])
+                }
             }
             columnCount++
         }
@@ -465,15 +503,42 @@ async function generateMaster(budgetYear, dateTime, contactPointDepartment) {
                     bold: false,
                     size: 8,
                 };
+                row.eachCell(function(cell, colNumber) {
+                    if (moneyColumn.includes(colNumber - 1)) {
+                        ws.getCell(cell.address).alignment = { horizontal: 'right' };
+                        cell.numFmt = '#,##0.00;[Red]-#,##0.00'
+                    } else {
+                        row.alignment = {
+                            horizontal: 'left'
+                        }
+                    }
+                })
             }
-            
         }
     });
+
+    // ws.eachRow((row, rowNumber) => {
+    //     if (rowNumber > 3) {
+    //         row.eachCell({ includeEmpty: true }, function(cell, colNumber) {
+    //             if ([16,17].includes(colNumber)) {
+    //                 cell.fill = {
+    //                     type: 'pattern',
+    //                     pattern: 'solid',
+    //                     fgColor: { argb: 'FFFF00' },
+    //                 }
+    //             }
+    //             console.log('Cell ' + colNumber + ' = ' + cell.value);
+    //         });
+    //     }
+    // })
     
     // write file
     let deapartmentOwner = contactPointDepartment.replaceAll(/[<>:"\/\\|?*]+/g, '_')
-    let writeFileName = `Template Budget CAPEX ${budgetYear} - ${deapartmentOwner}.xlsx`
-
+    let xlsxName = `Template Budget CAPEX ${budgetYear} - ${deapartmentOwner.toUpperCase()}.xlsx`;
+    await mkdirp(path.resolve(process.env.CAPEX_FOLDER_PATH));
+    await new Promise((resolve, reject) => setTimeout(resolve, 555));
+    let writeFileName = path.resolve(process.env.CAPEX_FOLDER_PATH + '/' + xlsxName);
+    ws.name = 'CAPEX_' + deapartmentOwner
     const writeFilePromise = new Promise((resolve, reject) => {
         wb.xlsx.writeFile(writeFileName)
         .then(() => {
